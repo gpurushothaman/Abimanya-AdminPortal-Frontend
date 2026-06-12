@@ -16,15 +16,21 @@ import App from './App';
 import { ConfigProvider } from 'contexts/ConfigContext';
 import reportWebVitals from './reportWebVitals';
 
+//Data-store
+import { Provider } from "react-redux";
+import store from "./data-store/store";
+
 const container = document.getElementById('root');
 const root = createRoot(container);
 
 // ==============================|| MAIN - REACT DOM RENDER ||============================== //
 
 root.render(
+  <Provider store={store}>
   <ConfigProvider>
     <App />
   </ConfigProvider>
+  </Provider>
 );
 
 // If you want to start measuring performance in your app, pass a function

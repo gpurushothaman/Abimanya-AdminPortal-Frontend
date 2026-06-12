@@ -27,9 +27,14 @@ import AnimateButton from 'components/@extended/AnimateButton';
 import EyeOutlined from '@ant-design/icons/EyeOutlined';
 import EyeInvisibleOutlined from '@ant-design/icons/EyeInvisibleOutlined';
 
+//redux
+import { useDispatch } from "react-redux";
+import { login } from "../../data-store/actions/authActions";
+
 // ============================|| JWT - LOGIN ||============================ //
 
 export default function AuthLogin({ isDemo = false }) {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [checked, setChecked] = React.useState(false);
 
@@ -44,6 +49,7 @@ export default function AuthLogin({ isDemo = false }) {
   
 
   const goToDashboard = () => {
+    dispatch(login("wow"));
     navigate("/dashboard");
   };
   return (

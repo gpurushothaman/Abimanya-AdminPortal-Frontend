@@ -750,6 +750,11 @@
   "resolved" "https://registry.npmjs.org/@types/react-transition-group/-/react-transition-group-4.4.12.tgz"
   "version" "4.4.12"
 
+"@types/use-sync-external-store@^0.0.6":
+  "integrity" "sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg=="
+  "resolved" "https://registry.npmjs.org/@types/use-sync-external-store/-/use-sync-external-store-0.0.6.tgz"
+  "version" "0.0.6"
+
 "@vitejs/plugin-react@6.0.2":
   "integrity" "sha512-DlSMqo4WhThw4vB8Mpn0Woe9J+Jfq1geJ61AKW0QEgLzGMNwtIMdxbDUzLxcun8W7NbJO0e2Jg/Nxm3cCSVzzg=="
   "resolved" "https://registry.npmjs.org/@vitejs/plugin-react/-/plugin-react-6.0.2.tgz"
@@ -2492,6 +2497,14 @@
   "resolved" "https://registry.npmjs.org/react-number-format/-/react-number-format-5.4.5.tgz"
   "version" "5.4.5"
 
+"react-redux@^9.3.0":
+  "integrity" "sha512-KQopgqFo/p/fgmAs5qz6p5RWaNAzq40WAu7fJIXnQpYxFPbJYtsJPWvGeF2rOBaY/kEuV77AVsX8TsQzKm+A/g=="
+  "resolved" "https://registry.npmjs.org/react-redux/-/react-redux-9.3.0.tgz"
+  "version" "9.3.0"
+  dependencies:
+    "@types/use-sync-external-store" "^0.0.6"
+    "use-sync-external-store" "^1.4.0"
+
 "react-router-dom@7.15.1":
   "integrity" "sha512-AzF62gjY6U9rkMq4RfP/r2EVtQ7DMfNMjyOp/flLTCrtRylLiK4wT4pSq6O8rOXZ2eXdZYJPEYe+ifomiv+Igg=="
   "resolved" "https://registry.npmjs.org/react-router-dom/-/react-router-dom-7.15.1.tgz"
@@ -2532,6 +2545,21 @@
     "slash" "^3.0.0"
     "sucrase" "^3.20.3"
     "tslib" "^1.9.3"
+
+"redux-devtools-extension@^2.13.9":
+  "integrity" "sha512-cNJ8Q/EtjhQaZ71c8I9+BPySIBVEKssbPpskBfsXqb8HJ002A3KRVHfeRzwRo6mGPqsm7XuHTqNSNeS1Khig0A=="
+  "resolved" "https://registry.npmjs.org/redux-devtools-extension/-/redux-devtools-extension-2.13.9.tgz"
+  "version" "2.13.9"
+
+"redux-thunk@^3.1.0":
+  "integrity" "sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw=="
+  "resolved" "https://registry.npmjs.org/redux-thunk/-/redux-thunk-3.1.0.tgz"
+  "version" "3.1.0"
+
+"redux@^5.0.1":
+  "integrity" "sha512-M9/ELqF6fy8FwmkpnF0S3YKOqMyoWJ4+CS5Efg2ct3oY9daQvd/Pc71FpGZsVsbl3Cpb+IIcjBDUnnyBdQbq4w=="
+  "resolved" "https://registry.npmjs.org/redux/-/redux-5.0.1.tgz"
+  "version" "5.0.1"
 
 "reflect.getprototypeof@^1.0.10", "reflect.getprototypeof@^1.0.9":
   "integrity" "sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw=="
@@ -3045,7 +3073,7 @@
   dependencies:
     "punycode" "^2.1.0"
 
-"use-sync-external-store@^1.6.0":
+"use-sync-external-store@^1.4.0", "use-sync-external-store@^1.6.0":
   "integrity" "sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w=="
   "resolved" "https://registry.npmjs.org/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz"
   "version" "1.6.0"
