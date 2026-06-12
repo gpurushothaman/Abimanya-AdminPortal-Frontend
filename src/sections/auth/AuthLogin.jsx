@@ -30,6 +30,7 @@ import EyeInvisibleOutlined from '@ant-design/icons/EyeInvisibleOutlined';
 //redux
 import { useDispatch } from "react-redux";
 import { login } from "../../data-store/actions/authActions";
+import axios from 'axios';
 
 // ============================|| JWT - LOGIN ||============================ //
 
@@ -48,10 +49,17 @@ export default function AuthLogin({ isDemo = false }) {
   };
   
 
-  const goToDashboard = () => {
-    dispatch(login("wow"));
+  const goToDashboard = async (email, password) => {
+  try {
+    const res = await axios.post("http://localhost:5000/api/admin/auth/login",{email,password});
+    localStorage.setItem("token", res.data.token);
+    dispatch(login(res.data.token));
+    alert("Login Success");
     navigate("/dashboard");
-  };
+  } catch (error) {
+    console.log( error);
+  }
+};
   return (
     <>
       <Formik
@@ -147,9 +155,9 @@ export default function AuthLogin({ isDemo = false }) {
               </Grid>
               <Grid size={12}>
                 <AnimateButton>
-                  <Button fullWidth size="large" variant="contained" color="primary" onClick={goToDashboard}>
-                    Login
-                  </Button>
+                 <Button fullWidth size="large" variant="contained" color="primary" onClick={() => goToDashboard(values.email, values.password)}>
+                  Login
+                 </Button>
                 </AnimateButton>
               </Grid>
             </Grid>
