@@ -1,211 +1,146 @@
 import axios from 'axios';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+//Toast
+import { useToast } from '../../contexts/ToastContext';
+//api
+import { getDoorLocations, createDoorLocations, updateDoorLocation, deleteDoorLocation } from '../../services/doorLocationService';
 
 export default function DoorLocation() {
-  const [doors, setDoors] = useState([
-    {
-      id: 1,
-      doorName: 'Main Entrance Door',
-      doorType: 'Entrance',
-      status: 'Active',
-      createdDate: '2025-06-01'
-    },
-    {
-      id: 2,
-      doorName: 'Balcony Door',
-      doorType: 'Balcony',
-      status: 'Active',
-      createdDate: '2025-06-02'
-    },
-    {
-      id: 3,
-      doorName: 'Bedroom Door',
-      doorType: 'Bedroom',
-      status: 'Active',
-      createdDate: '2025-06-03'
-    },
-    {
-      id: 4,
-      doorName: 'Bathroom Door',
-      doorType: 'Bathroom',
-      status: 'Active',
-      createdDate: '2025-06-04'
-    },
-    {
-      id: 5,
-      doorName: 'Kitchen Door',
-      doorType: 'Kitchen',
-      status: 'Active',
-      createdDate: '2025-06-05'
-    },
-     {
-      id: 6,
-      doorName: 'Living Room Door',
-      doorType: 'Living',
-      status: 'Active',
-      createdDate: '2025-06-06'
-    },
-     {
-      id: 7,
-      doorName: 'Pooja Room Door',
-      doorType: 'Pooja',
-      status: 'Active',
-      createdDate: '2025-06-07'
-    },
-     {
-      id: 8,
-      doorName: 'study office Door',
-      doorType: 'Study',
-      status: 'Active',
-      createdDate: '2025-06-08'
-    },
-     {
-      id: 9,
-      doorName: 'Store Room Door',
-      doorType: 'Store',
-      status: 'Active',
-      createdDate: '2025-06-09'
-    }
-  ]);
+  const { showToast } = useToast();
+  const [doors, setDoors] = useState([]);
 
-  const [selectedDoors, setSelectedDoors] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
   const [newDoorName, setNewDoorName] = useState('');
   const [newDoorType, setNewDoorType] = useState('');
-  const [newStatus, setNewStatus] = useState('Active');
+  const [newStatus, setNewStatus] = useState('active');
 
   const [searchTerm, setSearchTerm] = useState('');
   const [editingDoor, setEditingDoor] = useState(null);
 
-  const handleCheck = (doorId) => {
-    if (selectedDoors.includes(doorId)) {
-      setSelectedDoors(
-        selectedDoors.filter((id) => id !== doorId)
-      );
-    } else {
-      setSelectedDoors([...selectedDoors, doorId]);
+  useEffect(() => {
+    loadDoors();
+  }, []);
+
+  const loadDoors = async () => {
+    try {
+      const response = await getDoorLocations();
+      console.log(response.data.data);
+      setDoors(response.data.data);
+    } catch (error) {
+      console.error(error);
     }
   };
+
 
   const handleEdit = (door) => {
     setEditingDoor(door);
 
-    setNewDoorName(door.doorName);
-    setNewDoorType(door.doorType);
-    setNewStatus(door.status);
+    setNewDoorName(door.doorLocationName);
+    setNewDoorType(door.doorLocationValue);
+    setNewStatus(door.status ? 'active' : 'inactive');
 
     setShowModal(true);
   };
 
-  const handleDelete = (doorId) => {
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete this door?'
-    );
+  const handleDelete = async (doorId) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this door?');
 
-    if (confirmDelete) {
-      setDoors(
-        doors.filter((door) => door.id !== doorId)
-      );
+    if (confirmDelete) {      
+      try {      
+        const { data } = await deleteDoorLocation(doorId);
+        console.log('edit data:=', data);
+        if (data.success) {
+          setDoors(doors.filter((door) => door._id !== doorId));
 
-      setSelectedDoors(
-        selectedDoors.filter((id) => id !== doorId)
-      );
+          showToast('Door location deleted successfully', 'success');
+        } else {
+          showToast('Door location not delete', 'error');
+        }
+      } catch (error) {
+        console.error(error);
+        showToast('Something went wrong', 'error');
+      }
     }
   };
 
-  const handleAddDoor = () => {
+  const handleAddDoor = async () => {
     if (!newDoorName || !newDoorType) {
       alert('Please fill all fields');
       return;
     }
 
     if (editingDoor) {
-      setDoors(
-        doors.map((door) =>
-          door.id === editingDoor.id
-            ? {
-                ...door,
-                doorName: newDoorName,
-                doorType: newDoorType,
-                status: newStatus
-              }
-            : door
-        )
-      );
+      try {
+        const payload = {
+          doorLocationName: newDoorName,
+          doorLocationValue: newDoorType,
+          status: newStatus === 'active' ? true : false
+        };
+        const { data } = await updateDoorLocation(editingDoor._id, payload);
+        console.log('edit data:=', data);
+        if (data.success) {
+          setDoors(
+            doors.map((door) =>
+              door._id === editingDoor._id
+                ? {
+                    ...door,
+                    doorLocationName: data?.data?.['doorLocationName'],
+                    doorLocationValue: data?.data?.['doorLocationValue'],
+                    status: data?.data?.['status']
+                  }
+                : door
+            )
+          );
 
-      alert('Door Updated Successfully');
+          showToast('Door location updated successfully', 'success');
+        } else {
+          showToast('Door location not updated', 'error');
+        }
+      } catch (error) {
+        console.error(error);
+        showToast('Something went wrong', 'error');
+      }
     } else {
-      const newDoor = {
-        id: Date.now(),
-        doorName: newDoorName,
-        doorType: newDoorType,
-        status: newStatus,
-        createdDate: new Date()
-          .toISOString()
-          .split('T')[0]
-      };
-
-      setDoors([...doors, newDoor]);
-
-      alert('Door Added Successfully');
+      try {
+        const payload = {
+          doorLocationName: newDoorName,
+          doorLocationValue: newDoorType,
+          status: newStatus === 'active' ? true : false
+        };
+        const { data } = await createDoorLocations(payload);
+        console.log(data)
+        if (data.success) {
+          const newDoor = {
+            _id: data?.data?.[0]?.['_id'],
+            doorLocationName: data?.data?.[0]?.['doorLocationName'],
+            doorLocationValue: data?.data?.[0]?.['doorLocationValue'],
+            status: data?.data?.[0]?.['status'],
+            createdAt: data?.data?.[0]?.createdAt
+          };
+          setDoors([...doors, newDoor]);
+          showToast('Door location added successfully', 'success');
+        } else {
+          showToast('Door location not updated', 'error');
+        }
+      } catch (error) {
+        console.error(error);
+        showToast('Something went wrong', 'error');
+      }
     }
 
     setNewDoorName('');
     setNewDoorType('');
-    setNewStatus('Active');
+    setNewStatus('active');
 
     setEditingDoor(null);
     setShowModal(false);
   };
 
-        //      ((((((   THIYAGUU IMJECTED IN AXIOS AND BACNEND PROCESS      )))))) 
-
-const handleSave = async () => {
-  const selectedData = doors.filter((door) =>
-    selectedDoors.includes(door.id)
-  );
-  if (selectedData.length === 0) {
-    alert("Please select at least one door");
-    return;
-  }
-  try {
-    const token = localStorage.getItem("token");
-    console.log("TOKEN =", token);
-    const response = await axios.post("http://localhost:5000/api/admin/doorlocation/save",selectedData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
-    console.log(response.data);
-    alert("Door Locations Saved Successfully");
-  } catch (error) {
-    console.error(error);
-    console.log(
-      "Backend Error:",
-      error.response?.data
-    );
-    alert(
-      error.response?.data?.message ||
-      "Save Failed"
-    );
-  }
-};
-
-
-
-
-
   const filteredDoors = doors.filter(
     (door) =>
-      door.doorName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      door.doorType
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
+      door.doorLocationName?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+      door.doorLocationValue?.toLowerCase()?.includes(searchTerm?.toLowerCase())
   );
 
   return (
@@ -230,9 +165,7 @@ const handleSave = async () => {
           type="text"
           placeholder="Search Door..."
           value={searchTerm}
-          onChange={(e) =>
-            setSearchTerm(e.target.value)
-          }
+          onChange={(e) => setSearchTerm(e.target.value)}
           style={{
             width: '300px',
             padding: '10px',
@@ -246,7 +179,7 @@ const handleSave = async () => {
             setEditingDoor(null);
             setNewDoorName('');
             setNewDoorType('');
-            setNewStatus('Active');
+            setNewStatus('active');
             setShowModal(true);
           }}
           style={{
@@ -276,10 +209,8 @@ const handleSave = async () => {
           >
             <th style={thStyle}>S.No</th>
             <th style={thStyle}>Door Name</th>
-            <th style={thStyle}>Door Type</th>
             <th style={thStyle}>Status</th>
             <th style={thStyle}>Created Date</th>
-            <th style={thStyle}>Select</th>
             <th style={thStyle}>Action</th>
           </tr>
         </thead>
@@ -294,58 +225,33 @@ const handleSave = async () => {
                   padding: '20px'
                 }}
               >
-                No Door Found
+                No Door Location Found
               </td>
             </tr>
           ) : (
             filteredDoors.map((door, index) => (
-              <tr key={door.id}>
+              <tr key={door._id}>
                 <td style={tdStyle}>{index + 1}</td>
 
-                <td style={tdStyle}>
-                  {door.doorName}
-                </td>
-
-                <td style={tdStyle}>
-                  {door.doorType}
-                </td>
+                <td style={tdStyle}>{door.doorLocationName}</td>
 
                 <td style={tdStyle}>
                   <span
                     style={{
-                      background:
-                        door.status === 'Active'
-                          ? '#d9f7be'
-                          : '#ffccc7',
+                      background: door.status ? '#d9f7be' : '#ffccc7',
                       padding: '4px 10px',
                       borderRadius: '20px'
                     }}
                   >
-                    {door.status}
+                    {door.status ? 'Active' : 'Inactive'}
                   </span>
                 </td>
 
-                <td style={tdStyle}>
-                  {door.createdDate}
-                </td>
-
-                <td style={tdStyle}>
-                  <input
-                    type="checkbox"
-                    checked={selectedDoors.includes(
-                      door.id
-                    )}
-                    onChange={() =>
-                      handleCheck(door.id)
-                    }
-                  />
-                </td>
+                <td style={tdStyle}>{door.createdAt}</td>             
 
                 <td style={tdStyle}>
                   <button
-                    onClick={() =>
-                      handleEdit(door)
-                    }
+                    onClick={() => handleEdit(door)}
                     style={{
                       background: '#faad14',
                       color: '#fff',
@@ -360,9 +266,7 @@ const handleSave = async () => {
                   </button>
 
                   <button
-                    onClick={() =>
-                      handleDelete(door.id)
-                    }
+                    onClick={() => handleDelete(door._id)}
                     style={{
                       background: '#ff4d4f',
                       color: '#fff',
@@ -381,28 +285,12 @@ const handleSave = async () => {
         </tbody>
       </table>
 
-      <button
-        onClick={handleSave}
-        style={{
-          marginTop: '20px',
-          background: '#52c41a',
-          color: '#fff',
-          border: 'none',
-          padding: '10px 20px',
-          borderRadius: '6px',
-          cursor: 'pointer'
-        }}
-      >
-        Save Selected Doors
-      </button>
-
       {showModal && (
         <div
           style={{
             position: 'fixed',
             inset: 0,
-            background:
-              'rgba(0,0,0,0.5)',
+            background: 'rgba(0,0,0,0.5)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center'
@@ -416,11 +304,7 @@ const handleSave = async () => {
               borderRadius: '10px'
             }}
           >
-            <h2>
-              {editingDoor
-                ? 'Edit Door'
-                : 'Add Door'}
-            </h2>
+            <h2>{editingDoor ? 'Edit Door' : 'Add Door'}</h2>
 
             <div
               style={{
@@ -432,11 +316,7 @@ const handleSave = async () => {
               <input
                 type="text"
                 value={newDoorName}
-                onChange={(e) =>
-                  setNewDoorName(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setNewDoorName(e.target.value)}
                 style={{
                   width: '100%',
                   padding: '10px',
@@ -455,11 +335,7 @@ const handleSave = async () => {
               <input
                 type="text"
                 value={newDoorType}
-                onChange={(e) =>
-                  setNewDoorType(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setNewDoorType(e.target.value)}
                 style={{
                   width: '100%',
                   padding: '10px',
@@ -477,23 +353,15 @@ const handleSave = async () => {
 
               <select
                 value={newStatus}
-                onChange={(e) =>
-                  setNewStatus(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setNewStatus(e.target.value)}
                 style={{
                   width: '100%',
                   padding: '10px',
                   marginTop: '5px'
                 }}
               >
-                <option value="Active">
-                  Active
-                </option>
-                <option value="Inactive">
-                  Inactive
-                </option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
               </select>
             </div>
 
@@ -522,9 +390,7 @@ const handleSave = async () => {
                   padding: '8px 16px'
                 }}
               >
-                {editingDoor
-                  ? 'Update'
-                  : 'Add'}
+                {editingDoor ? 'Update' : 'Add'}
               </button>
             </div>
           </div>

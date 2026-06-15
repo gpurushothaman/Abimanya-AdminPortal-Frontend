@@ -17,8 +17,11 @@ import { ConfigProvider } from 'contexts/ConfigContext';
 import reportWebVitals from './reportWebVitals';
 
 //Data-store
-import { Provider } from "react-redux";
-import store from "./data-store/store";
+import { Provider } from 'react-redux';
+import store from './data-store/store';
+
+//Toast provider
+import ToastProvider from './components/toast/ToastProvider';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
@@ -27,9 +30,11 @@ const root = createRoot(container);
 
 root.render(
   <Provider store={store}>
-  <ConfigProvider>
-    <App />
-  </ConfigProvider>
+    <ConfigProvider>
+      <ToastProvider>
+        <App />
+      </ToastProvider>
+    </ConfigProvider>
   </Provider>
 );
 

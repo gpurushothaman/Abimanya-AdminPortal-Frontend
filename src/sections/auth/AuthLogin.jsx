@@ -27,14 +27,18 @@ import AnimateButton from 'components/@extended/AnimateButton';
 import EyeOutlined from '@ant-design/icons/EyeOutlined';
 import EyeInvisibleOutlined from '@ant-design/icons/EyeInvisibleOutlined';
 
-//redux
-import { useDispatch } from "react-redux";
-import { login } from "../../data-store/actions/authActions";
-import axios from 'axios';
+//Toast
+import { useToast } from '../../contexts/ToastContext';
 
-// ============================|| JWT - LOGIN ||============================ //
+//redux
+import { useDispatch } from 'react-redux';
+import { login } from '../../data-store/actions/authActions';
+
+//api
+import { authlogin } from '../../services/authService';
 
 export default function AuthLogin({ isDemo = false }) {
+  const { showToast } = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [checked, setChecked] = React.useState(false);
@@ -47,25 +51,28 @@ export default function AuthLogin({ isDemo = false }) {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
-  
 
   const goToDashboard = async (email, password) => {
-  try {
-    const res = await axios.post("http://localhost:5000/api/admin/auth/login",{email,password});
-    localStorage.setItem("token", res.data.token);
-    dispatch(login(res.data.token));
-    alert("Login Success");
-    navigate("/dashboard");
-  } catch (error) {
-    console.log( error);
-  }
-};
+    try {
+      const { data } = await authlogin({ email, password });
+      if (data.success) {
+        showToast('Login successfully', 'success');
+        dispatch(login(data.token));
+        navigate('/dashboard');
+      } else {
+        showToast('Credentials is wrong', 'error');
+      }
+    } catch (error) {
+      console.log(error);
+      showToast('Credentials is wrong', 'error');
+    }
+  };
   return (
     <>
       <Formik
         initialValues={{
-          email: 'info@codedthemes.com',
-          password: '123456',
+          email: '',
+          password: '',
           submit: null
         }}
         validationSchema={Yup.object().shape({
@@ -134,7 +141,7 @@ export default function AuthLogin({ isDemo = false }) {
                   </FormHelperText>
                 )}
               </Grid>
-              <Grid sx={{ mt: -1 }} size={12}>
+              {/* <Grid sx={{ mt: -1 }} size={12}>
                 <Stack direction="row" sx={{ gap: 2, alignItems: 'baseline', justifyContent: 'space-between' }}>
                   <FormControlLabel
                     control={
@@ -152,12 +159,18 @@ export default function AuthLogin({ isDemo = false }) {
                     Forgot Password?
                   </Link>
                 </Stack>
-              </Grid>
+              </Grid> */}
               <Grid size={12}>
                 <AnimateButton>
-                 <Button fullWidth size="large" variant="contained" color="primary" onClick={() => goToDashboard(values.email, values.password)}>
-                  Login
-                 </Button>
+                  <Button
+                    fullWidth
+                    size="large"
+                    variant="contained"
+                    color="primary"
+                    onClick={() => goToDashboard(values.email, values.password)}
+                  >
+                    Login
+                  </Button>
                 </AnimateButton>
               </Grid>
             </Grid>

@@ -17,8 +17,15 @@ export default function AuthFooter() {
       >
         <Typography variant="subtitle2" sx={{ color: 'secondary.main' }}>
           © Made with love by Team{' '}
-          <Link href="https://codedthemes.com/" target="_blank" underline="hover">
-            CodedThemes
+          <Link
+            href="#"
+            target="_blank"
+            underline="hover"
+            onClick={(e) => {
+              e.preventDefault();
+            }}
+          >
+            Abimanya Doors
           </Link>
         </Typography>
 
@@ -26,20 +33,26 @@ export default function AuthFooter() {
           <Typography
             variant="subtitle2"
             component={Link}
-            href="https://mui.com/store/terms/"
+            href="#"
             target="_blank"
             underline="hover"
             sx={{ color: 'secondary.main' }}
+            onClick={(e) => {
+              e.preventDefault();
+            }}
           >
             Terms and Conditions
           </Typography>
           <Typography
             variant="subtitle2"
             component={Link}
-            href="https://mui.com/legal/privacy/"
+            href="#"
             target="_blank"
             underline="hover"
             sx={{ color: 'secondary.main' }}
+            onClick={(e) => {
+              e.preventDefault();
+            }}
           >
             Privacy Policy
           </Typography>
