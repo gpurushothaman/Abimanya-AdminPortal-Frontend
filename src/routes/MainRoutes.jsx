@@ -4,9 +4,11 @@ import { lazy } from 'react';
 import Loadable from 'components/Loadable';
 import DashboardLayout from 'layout/Dashboard';
 import AuthGuard from "./AuthGuard";
+import DoorLocation from '../pages/doorlocation/DoorLocation';
 
 // render- Dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
+
 
 // render - color
 //const Color = Loadable(lazy(() => import('pages/component-overview/color')));
@@ -25,17 +27,12 @@ const MainRoutes = {
     {
       path: 'dashboard',
       element: <DashboardDefault />
-      // children: [
-      //   {
-      //     path: 'default',
-      //     element: <DashboardDefault />
-      //   }
-      // ]
+     
     },
-    // {
-    //   path: 'typography',
-    //   element: <Typography />
-    // },
+   {
+    path: 'door-location',
+    element: <DoorLocation/>
+   }
     
   ]
 };

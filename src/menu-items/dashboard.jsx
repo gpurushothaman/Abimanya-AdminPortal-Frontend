@@ -20,7 +20,15 @@ const dashboard = {
       url: '/dashboard',
       icon: icons.DashboardOutlined,
       breadcrumbs: false
-    }
+    },
+    {
+    id: 'door-location',
+    title: 'Door Location',
+    type: 'item',
+    url: '/door-location',
+    icon: icons.DashboardOutlined,
+    breadcrumbs: false
+  }
   ]
 };
 
