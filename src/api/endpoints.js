@@ -3,5 +3,7 @@
   REGISTER: "/auth/register",
   USERS: "/users",
   PROFILE: "/users/profile",
-  DOOR_LOCATION: "/door-location"
+  DOOR_LOCATION: "/door-location",
+  WALL_THICKNESS: "/wall-thickness",
+  FRAME_SIZE:"/frame-size"
 };

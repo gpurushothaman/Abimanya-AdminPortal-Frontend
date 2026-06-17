@@ -5,6 +5,14 @@ import Loadable from 'components/Loadable';
 import DashboardLayout from 'layout/Dashboard';
 import AuthGuard from "./AuthGuard";
 import DoorLocation from '../pages/doorlocation/DoorLocation';
+import DoorThresold from '../pages/thersold/DoorThresold';
+import DoorFrame from '../pages/doorframe/DoorFrame';
+import WallThickNess from '../pages/wallthickness/WallThickness';
+import DoorThersold from '../pages/thersold/DoorThresold';
+import JampLocation from '../pages/jamplocation/JampLocation';
+import Architrave from '../pages/architrave/Architrave';
+import DoorOrientation from '../pages/doororientation/DoorOrientation';
+import FrameSize from '../pages/framesize/FrameSize';
 
 // render- Dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -20,18 +28,45 @@ const MainRoutes = {
   path: '/',
   element: (<AuthGuard><DashboardLayout /></AuthGuard>),
   children: [
-    {
+  {
       path: '/',
       element: <DashboardDefault />
     },
     {
       path: 'dashboard',
       element: <DashboardDefault />
-     
     },
    {
     path: 'door-location',
     element: <DoorLocation/>
+   },
+   {
+    path:'door-frame',
+    element:<DoorFrame/>
+   },
+   {
+    path:'wall-thickness',
+    element:<WallThickNess/>
+   },
+   {
+    path:'door-thersold',
+    element:<DoorThersold/>
+   },
+   {
+    path:'jamp-location',
+    element:<JampLocation/>
+   },
+   {
+    path:'architrave',
+    element:<Architrave/>
+   },
+   {
+    path:'door-orientation',
+    element:<DoorOrientation/>
+   },
+   {
+    path:'frame-size',
+    element:<FrameSize/>
    }
     
   ]
