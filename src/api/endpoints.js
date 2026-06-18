@@ -4,6 +4,6 @@
   USERS: "/users",
   PROFILE: "/users/profile",
   DOOR_LOCATION: "/door-location",
-  WALL_THICKNESS: "/wall-thickness",
+  DOOR_THICKNESS: "/door-thickness",
   FRAME_SIZE:"/frame-size"
 };

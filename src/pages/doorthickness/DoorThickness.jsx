@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
 
-import {getWallThickness,createWallThickness,updateWallThickness,deleteWallThickness,} from "../../services/wallThicknessService";
+import {getDoorThickness,createDoorThickness,updateDoorThickness,deleteDoorThickness,} from "../../services/DoorThicknessService";
 
-const WallThickNess = () => {
+const DoorThickNess = () => {
   const [options, setOptions] = useState([]);
   const [newThickness, setNewThickness] = useState("");
+  const [thicknessValue, setThicknessValue] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchWallThickness();
+    fetchDoorThickness();
   }, []);
-
-  const fetchWallThickness = async () => {
+  const fetchDoorThickness = async () => {
     try {
-      const response = await getWallThickness();
-
+      const response = await getDoorThickness();
      setOptions(
      response.data.data.map((item) => ({
     ...item,
@@ -26,22 +26,29 @@ const WallThickNess = () => {
     }
   };
 
+
+
   const handleEdit = async (id) => {
     const selected = options.find(
       (item) => item._id === id
     );
-
     if (selected.editing) {
+        const confirmed = window.confirm("Are you sure you want to update this item?");
       try {
-        await updateWallThickness(id, {
-          name: selected.name,
-        });
+       await updateDoorThickness(id, {
+         name: `${selected.value}mm`,
+         value: selected.value,
+       });
+        console.log("Sending:", {
+  name: selected.name,
+  value: selected.value,
+});
+        console.log("updated")
       } catch (error) {
         console.error("Update Error:", error);
         return;
       }
     }
-
     setOptions(
       options.map((item) =>
         item._id === id
@@ -50,6 +57,8 @@ const WallThickNess = () => {
       )
     );
   };
+
+
 
   const handleChange = (id, value) => {
     setOptions(
@@ -61,19 +70,42 @@ const WallThickNess = () => {
     );
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await deleteWallThickness(id);
 
-      setOptions(
-        options.filter(
-          (item) => item._id !== id
-        )
+const handleNameChange = (id, value) => {
+  setOptions(
+    options.map((item) =>
+      item._id === id
+        ? { ...item, name: value }
+        : item
+    )
+  );
+};
+
+const handleValueChange = (id, value) => {
+  setOptions(
+    options.map((item) =>
+      item._id === id
+        ? { ...item, value: value }
+        : item
+    )
+  );
+};
+
+
+
+  const handleDelete = async (id) => {
+     const confirmed = window.confirm("Are you sure you want to delete this item?");
+     if (!confirmed) return;
+     try {
+      await deleteDoorThickness(id);
+      setOptions(options.filter((item) => item._id !== id)
       );
     } catch (error) {
       console.error("Delete Error:", error);
     }
   };
+
+
 
   const handleCheck = (id) => {
     setOptions(
@@ -85,32 +117,48 @@ const WallThickNess = () => {
     );
   };
 
+  // THIYAGUUUUUUUUU
+  const handleThicknessValueChange = (e) => {
+  const value = e.target.value;
+  if (/^\d*$/.test(value)) {
+    setThicknessValue(value);
+    setError("");
+  } else {
+    setError("Enter correct value");
+  }
+};
+
+
   const handleSave = async () => {
     if (!newThickness.trim()) {
       alert("Enter Thickness");
       return;
     }
-
     try {
       const response =
-        await createWallThickness({
+        await createDoorThickness({
           name: newThickness,
+          value: thicknessValue,
         });
-
+        console.log(response.data.data);
       setOptions([
         ...options,
         {
-          ...response.data,
+          ...response.data.data,
           editing: false,
           checked: false,
         },
       ]);
-
-      setNewThickness("");
+setNewThickness("");
+setThicknessValue("");
+setError("");
     } catch (error) {
       console.error("Create Error:", error);
     }
   };
+
+
+
 
   return (
     <div style={{ padding: "25px" }}>
@@ -121,7 +169,7 @@ const WallThickNess = () => {
           fontWeight: "600",
         }}
       >
-        Wall Thickness
+        Door Thickness
       </h2>
 
       <div
@@ -131,20 +179,50 @@ const WallThickNess = () => {
           gap: "10px",
         }}
       >
-        <input
-          type="text"
-          placeholder="Enter Thickness"
-          value={newThickness}
-          onChange={(e) =>
-            setNewThickness(e.target.value)
-          }
-          style={{
-            padding: "10px",
-            width: "250px",
-            border: "1px solid #ccc",
-            borderRadius: "6px",
-          }}
-        />
+
+        {/* FIRST CHECKBOX */}
+
+<input
+  type="text"
+  placeholder="Enter Thickness name"
+  value={newThickness}
+  onChange={(e) => setNewThickness(e.target.value)}
+  style={{
+    padding: "10px",
+    width: "250px",
+    border: "1px solid #ccc",
+    borderRadius: "6px",
+  }}
+/>
+
+
+        {/* SECOND CHECKBOX */}
+<input
+  type="text"
+  placeholder="Enter Thickness Value"
+  value={thicknessValue}
+  onChange={handleThicknessValueChange}
+  style={{
+    padding: "10px",
+    width: "250px",
+    border: "1px solid #ccc",
+    borderRadius: "6px",
+  }}
+/>
+
+
+{/* ERROR MESSAGE */}
+{error && (
+  <p
+    style={{
+      color: "red",
+      fontSize: "12px",
+      marginTop: "5px",
+    }}
+  >
+    {error}
+  </p>
+)}
 
         <button
           onClick={handleSave}
@@ -203,37 +281,31 @@ const WallThickNess = () => {
                 flex: 1,
               }}
             >
-              <input
+              {/* <input
                 type="checkbox"
                 checked={item.checked}
                 onChange={() =>
                   handleCheck(item._id)
                 }
-              />
+              /> */}
 
-              {item.editing ? (
-                <input
-                  value={item.name}
-                  onChange={(e) =>
-                    handleChange(
-                      item._id,
-                      e.target.value
-                    )
-                  }
-                  style={{
-                    padding: "6px 10px",
-                    width: "200px",
-                  }}
-                />
-              ) : (
-                <span
-                  style={{
-                    fontSize: "15px",
-                  }}
-                >
-                  {item.name}
-                </span>
-              )}
+            
+              
+{item.editing ? (
+  <input
+    value={item.value}
+    onChange={(e) =>
+      handleValueChange(
+        item._id,
+        e.target.value
+      )
+    }
+  />
+) : (
+  <>
+    <span>{item.value}</span>
+  </>
+)}
             </div>
 
             <div>
@@ -275,4 +347,4 @@ const WallThickNess = () => {
   );
 };
 
-export default WallThickNess;
+export default DoorThickNess;

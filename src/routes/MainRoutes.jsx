@@ -7,12 +7,12 @@ import AuthGuard from "./AuthGuard";
 import DoorLocation from '../pages/doorlocation/DoorLocation';
 import DoorThresold from '../pages/thersold/DoorThresold';
 import DoorFrame from '../pages/doorframe/DoorFrame';
-import WallThickNess from '../pages/wallthickness/WallThickness';
 import DoorThersold from '../pages/thersold/DoorThresold';
 import JampLocation from '../pages/jamplocation/JampLocation';
 import Architrave from '../pages/architrave/Architrave';
 import DoorOrientation from '../pages/doororientation/DoorOrientation';
 import FrameSize from '../pages/framesize/FrameSize';
+import DoorThickNess from '../pages/doorthickness/DoorThickness';
 
 // render- Dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -45,8 +45,8 @@ const MainRoutes = {
     element:<DoorFrame/>
    },
    {
-    path:'wall-thickness',
-    element:<WallThickNess/>
+    path:'door-thickness',
+    element:<DoorThickNess/>
    },
    {
     path:'door-thersold',

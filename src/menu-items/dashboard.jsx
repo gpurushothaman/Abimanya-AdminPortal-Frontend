@@ -36,10 +36,10 @@ const dashboard = {
     icon: icons.DashboardOutlined,
     breadcrumbs:false
   },{
-    id :'wall-thickness',
-    title:'Wall Thickness',
+    id :'door-thickness',
+    title:'Door Thickness',
     type:'item',
-    url:'/wall-thickness',
+    url:'/door-thickness',
     icon: icons.DashboardOutlined,
     breadcrumbs:false
   },
