@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import {getDoorThickness,createDoorThickness,updateDoorThickness,deleteDoorThickness,} from "../../services/doorThicknessService";
 import { useToast } from "../../contexts/ToastContext";
 
@@ -32,38 +31,43 @@ const DoorThickNess = () => {
 
 
   const handleEdit = async (id) => {
-    const selected = options.find(
-      (item) => item._id === id
-    );
-    if (selected.editing) {
-        const confirmed = window.confirm("Are you sure you want to update this item?");
- if (!confirmed) return;
+    const selected = options.find((item) => item._id === id);
+    if (!selected) return;
 
-    try {
-      const { data } = await updateDoorThickness(
-        id,
-        {
+    // If currently editing (✔️), save/update
+    if (selected.editing) {
+      const confirmed = window.confirm(
+        "Are you sure you want to update this item?"
+      );
+      if (!confirmed) return;
+
+      try {
+        const { data } = await updateDoorThickness(id, {
           name: `${selected.value}mm`,
           value: selected.value,
+        });
+
+        if (data.success) {
+          showToast("Door thickness updated successfully", "success");
+          setOptions(
+            options.map((item) =>
+              item._id === id ? { ...item, editing: false } : item
+            )
+          );
+        } else {
+          showToast("Door thickness update failed", "error");
         }
-      );
-      if (data.success) {
-        showToast("Door thickness updated successfully","success");
-      } else {
-        showToast("Door thickness update failed","error");
-        return;
+      } catch (error) {
+        console.error("Update Error:", error);
+        showToast("Something went wrong", "error");
       }
-    } catch (error) {
-      console.error("Update Error:", error);
-      showToast("Something went wrong","error");
       return;
     }
-  }
+
+    // If not editing (✏️), enter edit mode
     setOptions(
       options.map((item) =>
-        item._id === id
-          ? { ...item, editing: !item.editing }
-          : item
+        item._id === id ? { ...item, editing: true } : item
       )
     );
   };
