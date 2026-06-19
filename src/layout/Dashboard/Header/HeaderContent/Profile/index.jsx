@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -29,6 +30,10 @@ import SettingOutlined from '@ant-design/icons/SettingOutlined';
 import UserOutlined from '@ant-design/icons/UserOutlined';
 import avatar1 from 'assets/images/users/avatar-1.png';
 
+//redux
+import { useDispatch } from 'react-redux';
+import { logout } from '../../../../../data-store/actions/authActions';
+
 // tab panel wrapper
 function TabPanel({ children, value, index, ...other }) {
   return (
@@ -49,6 +54,8 @@ function a11yProps(index) {
 
 export default function Profile() {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
@@ -69,6 +76,10 @@ export default function Profile() {
     setValue(newValue);
   };
 
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
   return (
     <Box sx={{ flexShrink: 0, ml: 'auto' }}>
       <Tooltip title="Profile" disableInteractive>
@@ -122,7 +133,7 @@ export default function Profile() {
                         </Stack>
                       </Stack>
                       <Tooltip title="Logout">
-                        <IconButton size="large" sx={{ color: 'text.primary' }}>
+                        <IconButton size="large" sx={{ color: 'text.primary' }} onClick={()=>handleLogout()}>
                           <LogoutOutlined />
                         </IconButton>
                       </Tooltip>

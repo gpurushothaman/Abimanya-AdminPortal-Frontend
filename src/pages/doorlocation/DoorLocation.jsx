@@ -19,10 +19,10 @@ export default function DoorLocation() {
   const [editingDoor, setEditingDoor] = useState(null);
 
   useEffect(() => {
-    loadDoors();
+    loadDoorsLocation();
   }, []);
 
-  const loadDoors = async () => {
+  const loadDoorsLocation = async () => {
     try {
       const response = await getDoorLocations();
       console.log(response.data.data);
