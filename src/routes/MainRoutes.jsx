@@ -13,6 +13,7 @@ import Architrave from '../pages/architrave/Architrave';
 import DoorOrientation from '../pages/doororientation/DoorOrientation';
 import FrameSize from '../pages/framesize/FrameSize';
 import DoorThickNess from '../pages/doorthickness/DoorThickness';
+import Dimension from '../pages/dimension/Dimension';
 
 // render- Dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -67,6 +68,10 @@ const MainRoutes = {
    {
     path:'frame-size',
     element:<FrameSize/>
+   },
+   {
+    path:'dimension',
+    element:<Dimension/>
    }
     
   ]

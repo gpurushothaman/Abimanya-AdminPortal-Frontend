@@ -1,9 +1,10 @@
 // assets
-import { DashboardOutlined } from '@ant-design/icons';
+import { DashboardOutlined, DiffTwoTone } from '@ant-design/icons';
 
 // icons
 const icons = {
-  DashboardOutlined
+  DashboardOutlined,
+  DiffTwoTone
 };
 
 // ==============================|| MENU ITEMS - DASHBOARD ||============================== //
@@ -82,6 +83,14 @@ const dashboard = {
     type:'item',
     url:'/frame-size',
     icon: icons.DashboardOutlined,
+    breadcrumbs:false
+  },
+  {
+    id :'dimension',
+    title:'Dimension',
+    type:'item',
+    url:'/dimension',
+    icon: icons.DiffTwoTone,
     breadcrumbs:false
   }
   ]
