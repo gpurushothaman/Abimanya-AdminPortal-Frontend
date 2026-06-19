@@ -36,8 +36,8 @@ const DoorThickNess = () => {
 
       try {
         const { data } = await updateDoorThickness(id, {
-          DoorThicknessname: `${selected.DoorThicknessname}mm`,
-          DoorThicknessvalue: selected.DoorThicknessvalue
+          DoorThicknessname: selected.DoorThicknessname,
+          DoorThicknessvalue: Number(selected.DoorThicknessvalue)
         });
         if (data.success) {
           showToast('Door thickness updated successfully', 'success');
@@ -54,17 +54,26 @@ const DoorThickNess = () => {
     setOptions(options.map((item) => (item._id === id ? { ...item, editing: !item.editing } : item)));
   };
 
-  const handleChange = (id, value) => {
-    setOptions(options.map((item) => (item._id === id ? { ...item, name: value } : item)));
-  };
+
 
   const handleNameChange = (id, value) => {
-    setOptions(options.map((item) => (item._id === id ? { ...item, name: value } : item)));
+    setOptions(options.map((item) =>
+      item._id === id
+        ? { ...item, DoorThicknessname: value }
+        : item
+    ));
   };
 
   const handleValueChange = (id, value) => {
-    console.log("sadf======")
-    setOptions(options.map((item) => (item._id === id ? { ...item, DoorThicknessname: value } : item)));
+    if (/^\d*$/.test(value)) {
+      setOptions(
+        options.map((item) =>
+          item._id === id
+            ? { ...item, DoorThicknessvalue: value }
+            : item
+        )
+      );
+    }
   };
 
   // UPDATE TOAST OPTIONS FOR   -----  >   ((((  DELETE MODEL  ))))
@@ -165,7 +174,7 @@ const DoorThickNess = () => {
 
         {/* SECOND CHECKBOX */}
         <input
-          type="text"
+          type="number"
           placeholder="Enter Thickness Value"
           value={thicknessValue}
           onChange={handleThicknessValueChange}
@@ -207,7 +216,7 @@ const DoorThickNess = () => {
 
       <div
         style={{
-          width: '550px',
+          width: '600px',
           background: '#fff',
           border: '1px solid #dcdcdc',
           borderRadius: '8px',
@@ -255,23 +264,74 @@ const DoorThickNess = () => {
               /> */}
 
               {item.editing ? (
-                <input value={item.DoorThicknessname} onChange={(e) => handleValueChange(item._id, e.target.value)} />
-              ) : (
-                <>
-                  <span>{item.DoorThicknessname}</span>
-                </>
-              )}
-            </div>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px"
+                  }}
+                >
+                  <input
+                    value={item.DoorThicknessname}
+                    onChange={(e) =>
+                      handleNameChange(item._id, e.target.value)
+                    }
+                    style={{
+                      padding: "6px"
+                    }}
+                  />
 
-            <div>
+                  <input
+                    value={item.DoorThicknessvalue}
+                    onChange={(e) =>
+                      handleValueChange(item._id, e.target.value)
+                    }
+                    style={{
+                      padding: "6px"
+                    }}
+                  />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px"
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "220px"
+                    }}
+                  >
+                    {item.DoorThicknessname}
+                  </div>
+
+                  <div
+                    style={{
+                      width: "220px"
+                    }}
+                  >
+                    {item.DoorThicknessvalue}
+                  </div>
+                </div>
+              )}
+
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
+                flexShrink: 0
+              }}
+            >
               <button
                 onClick={() => handleEdit(item._id)}
                 style={{
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  fontSize: '18px',
-                  marginRight: '15px'
+                  fontSize: '18px'
                 }}
               >
                 {item.editing ? '✔️' : '✏️'}
