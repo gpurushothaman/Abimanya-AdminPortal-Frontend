@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 
-import {getDoorThickness,createDoorThickness,updateDoorThickness,deleteDoorThickness,} from "../../services/DoorThicknessService";
+import {getDoorThickness,createDoorThickness,updateDoorThickness,deleteDoorThickness,} from "../../services/doorThicknessService";
+import { useToast } from "../../contexts/ToastContext";
+
 
 const DoorThickNess = () => {
+  const { showToast } = useToast();
   const [options, setOptions] = useState([]);
   const [newThickness, setNewThickness] = useState("");
   const [thicknessValue, setThicknessValue] = useState("");
@@ -34,21 +37,28 @@ const DoorThickNess = () => {
     );
     if (selected.editing) {
         const confirmed = window.confirm("Are you sure you want to update this item?");
-      try {
-       await updateDoorThickness(id, {
-         name: `${selected.value}mm`,
-         value: selected.value,
-       });
-        console.log("Sending:", {
-  name: selected.name,
-  value: selected.value,
-});
-        console.log("updated")
-      } catch (error) {
-        console.error("Update Error:", error);
+ if (!confirmed) return;
+
+    try {
+      const { data } = await updateDoorThickness(
+        id,
+        {
+          name: `${selected.value}mm`,
+          value: selected.value,
+        }
+      );
+      if (data.success) {
+        showToast("Door thickness updated successfully","success");
+      } else {
+        showToast("Door thickness update failed","error");
         return;
       }
+    } catch (error) {
+      console.error("Update Error:", error);
+      showToast("Something went wrong","error");
+      return;
     }
+  }
     setOptions(
       options.map((item) =>
         item._id === id
@@ -91,19 +101,25 @@ const handleValueChange = (id, value) => {
   );
 };
 
-
+// UPDATE TOAST OPTIONS FOR   -----  >   ((((  DELETE MODEL  ))))
 
   const handleDelete = async (id) => {
-     const confirmed = window.confirm("Are you sure you want to delete this item?");
-     if (!confirmed) return;
-     try {
-      await deleteDoorThickness(id);
-      setOptions(options.filter((item) => item._id !== id)
-      );
-    } catch (error) {
-      console.error("Delete Error:", error);
+  const confirmed = window.confirm("Are you sure you want to delete this item?");
+  if (!confirmed) return;
+  try {
+    const { data } = await deleteDoorThickness(id);
+    if (data.success) {
+      setOptions( options.filter((item) => item._id !== id));
+      showToast("Door thickness deleted successfully","success");
+    } else {
+      showToast(
+        "Door thickness not deleted","error");
     }
-  };
+  } catch (error) {
+    console.error("Delete Error:", error);
+    showToast("Something went wrong","error");
+  }
+};
 
 
 
