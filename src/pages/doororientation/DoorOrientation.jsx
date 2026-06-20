@@ -1,46 +1,155 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import {getDoorOrientation,createDoorOrientation,updateDoorOrientation,} from "../../services/doorOrientationService";
+import { useToast } from '../../contexts/ToastContext';
+
 
 const DoorOrientation = () => {
-  const [options, setOptions] = useState([
-    { id: 1, name: "RHS", editing: false, checked: false },
-    { id: 2, name: "LHS", editing: false, checked: false },
-  ]);
+  const { showToast } = useToast();
+ const [newOrientation, setNewOrientation] = useState("");
+const [orientationValue, setOrientationValue] =useState("");
+const [options, setOptions] = useState([]);
 
-  const handleEdit = (id) => {
+useEffect(() => {
+  fetchDoorOrientation();
+}, []);
+
+const fetchDoorOrientation = async () => {
+  try {
+    const response = await getDoorOrientation();
+
     setOptions(
-      options.map((item) =>
-        item.id === id
-          ? { ...item, editing: !item.editing }
-          : item
-      )
+      response.data.data.map((item) => ({
+        ...item,
+        editing: false,
+      }))
     );
-  };
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-  const handleChange = (id, value) => {
-    setOptions(
-      options.map((item) =>
-        item.id === id ? { ...item, name: value } : item
-      )
+  const handleEdit = async (id) => {
+  const selected = options.find(
+    (item) => item._id === id
+  );
+
+  if (selected.editing) {
+    try {
+      await updateDoorOrientation(id, {
+        DoorOrientationname:
+          selected.DoorOrientationname,
+        DoorOrientationvalue:
+          selected.DoorOrientationvalue,
+      });
+
+      showToast(
+        "Door Orientation Updated Successfully",
+        "success"
+      );
+    } catch (error) {
+      console.error(error);
+
+      showToast(
+        "Update Failed",
+        "error"
+      );
+
+      return;
+    }
+  }
+
+  setOptions(
+    options.map((item) =>
+      item._id === id
+        ? {
+            ...item,
+            editing: !item.editing,
+          }
+        : item
+    )
+  );
+};
+
+ const handleChange = (id, value) => {
+  setOptions(
+    options.map((item) =>
+      item._id === id
+        ? {
+            ...item,
+            DoorOrientationname: value,
+          }
+        : item
+    )
+  );
+};
+
+const handleValueChange = (id, value) => {
+  setOptions(
+    options.map((item) =>
+      item._id === id
+        ? {
+            ...item,
+            DoorOrientationvalue: value,
+          }
+        : item
+    )
+  );
+};
+
+
+
+
+const handleSave = async () => {
+ if (!newOrientation.trim()) {
+  showToast(
+    "Enter Orientation Name",
+    "error"
+  );
+  return;
+}
+
+if (!orientationValue) {
+  showToast(
+    "Select Orientation Value",
+    "error"
+  );
+  return;
+}
+
+  try {
+    const response =
+      await createDoorOrientation({
+        DoorOrientationname:
+          newOrientation,
+        DoorOrientationvalue:
+          orientationValue,
+      });
+
+    setOptions([
+      ...options,
+      {
+        ...response.data.data,
+        editing: false,
+      },
+    ]);
+
+    setNewOrientation("");
+    setOrientationValue("");
+
+    showToast(
+      "Door Orientation Added Successfully",
+      "success"
     );
-  };
+  } catch (error) {
+    console.error(error);
 
-  const handleDelete = (id) => {
-    setOptions(options.filter((item) => item.id !== id));
-  };
-
-  const handleCheck = (id) => {
-    setOptions(
-      options.map((item) =>
-        item.id === id
-          ? { ...item, checked: !item.checked }
-          : item
-      )
+    showToast(
+      error.response?.data?.message ||
+      "Something went wrong",
+      "error"
     );
-  };
-
-  const handleSave = () => {
-    alert("Saved Successfully");
-  };
+  }
+};
 
   return (
     <div style={{ padding: "25px" }}>
@@ -53,6 +162,63 @@ const DoorOrientation = () => {
       >
         Door Orientation
       </h2>
+
+
+      {/* THIYAGUUU */}
+
+      <div
+  style={{
+    marginBottom: "20px",
+    display: "flex",
+    gap: "10px",
+  }}
+>
+  <input
+    type="text"
+    placeholder="Enter Orientation Name"
+    value={newOrientation}
+    onChange={(e) =>
+      setNewOrientation(e.target.value)
+    }
+    style={{
+      padding: "10px",
+      width: "250px",
+      border: "1px solid #ccc",
+      borderRadius: "6px",
+    }}
+  />
+
+  <select
+    value={orientationValue}
+    onChange={(e) =>
+      setOrientationValue(e.target.value)
+    }
+    style={{
+      padding: "10px",
+      width: "250px",
+      border: "1px solid #ccc",
+      borderRadius: "6px",
+    }}
+  >
+    <option value="">Enter Orientation</option>
+    <option value="lhs">Lhs</option>
+    <option value="rhs">Rhs</option>
+  </select>
+
+  <button
+    onClick={handleSave}
+    style={{
+      padding: "10px 20px",
+      backgroundColor: "#1976d2",
+      color: "#fff",
+      border: "none",
+      borderRadius: "6px",
+      cursor: "pointer",
+    }}
+  >
+    Add
+  </button>
+</div>
 
       <div
         style={{
@@ -78,7 +244,7 @@ const DoorOrientation = () => {
 
         {options.map((item, index) => (
           <div
-            key={item.id}
+            key={item._id}
             style={{
               display: "flex",
               alignItems: "center",
@@ -98,33 +264,79 @@ const DoorOrientation = () => {
                 flex: 1,
               }}
             >
-              <input
-                type="checkbox"
-                checked={item.checked}
-                onChange={() => handleCheck(item.id)}
-              />
+              
 
               {item.editing ? (
-                <input
-                  value={item.name}
-                  onChange={(e) =>
-                    handleChange(item.id, e.target.value)
-                  }
-                  style={{
-                    padding: "6px 10px",
-                    width: "200px",
-                  }}
-                />
-              ) : (
-                <span style={{ fontSize: "15px" }}>
-                  {item.name}
-                </span>
+  <div
+    style={{
+      display: "flex",
+      gap: "10px",
+    }}
+  >
+    <input
+      value={item.DoorOrientationname}
+      onChange={(e) =>
+        handleChange(item._id, e.target.value)
+      }
+      style={{
+        padding: "6px 10px",
+        width: "180px",
+      }}
+    />
+
+    <select
+     value={item.DoorOrientationvalue}
+      onChange={(e) =>
+        handleValueChange(
+          item._id,
+          e.target.value
+        )
+      }
+      style={{
+        padding: "6px 10px",
+        width: "120px",
+      }}
+    >
+      <option value="lhs">lhs</option>
+      <option value="rhs">rhs</option>
+    </select>
+  </div>
+) : (
+
+// replace span option for show UI in two input values   ----->
+<div
+  style={{
+    display: "flex",
+    gap: "20px",
+  }}
+>
+  <span
+    style={{
+      width: "180px",
+      fontSize: "15px",
+    }}
+  >
+      {item.DoorOrientationname}
+  </span>
+
+  <span
+    style={{
+      width: "80px",
+      fontSize: "15px",
+    }}
+  >
+    {item.DoorOrientationvalue}
+  </span>
+</div>
+
+
+
               )}
             </div>
 
             <div>
               <button
-                onClick={() => handleEdit(item.id)}
+                onClick={() => handleEdit(item._id)}
                 style={{
                   border: "none",
                   background: "transparent",
@@ -136,38 +348,12 @@ const DoorOrientation = () => {
                 {item.editing ? "✔️" : "✏️"}
               </button>
 
-              <button
-                onClick={() => handleDelete(item.id)}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  fontSize: "18px",
-                }}
-              >
-                🗑️
-              </button>
+      
             </div>
           </div>
         ))}
       </div>
 
-      <button
-        onClick={handleSave}
-        style={{
-          marginTop: "20px",
-          padding: "10px 24px",
-          backgroundColor: "#1976d2",
-          color: "#fff",
-          border: "none",
-          borderRadius: "6px",
-          cursor: "pointer",
-          fontSize: "14px",
-          fontWeight: "500",
-        }}
-      >
-        Save
-      </button>
     </div>
   );
 };
