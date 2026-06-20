@@ -7,5 +7,6 @@
   DOOR_THICKNESS: "/door-thickness",
   FRAME_SIZE:"/frame-size",
   DIMENSION: "/dimension",
-  DOOR_ORIENTATION:"/door-orientation"
+  DOOR_ORIENTATION:"/door-orientation",
+  DOOR_JAMB_LOCATION:"/door-jamb-location",
 };

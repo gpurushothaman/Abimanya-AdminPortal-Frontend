@@ -8,7 +8,7 @@ import DoorLocation from '../pages/doorlocation/DoorLocation';
 import DoorThresold from '../pages/thersold/DoorThresold';
 import DoorFrame from '../pages/doorframe/DoorFrame';
 import DoorThersold from '../pages/thersold/DoorThresold';
-import JampLocation from '../pages/jamplocation/JampLocation';
+import JambLocation from "../pages/jamblocation/JambLocation";
 import Architrave from '../pages/architrave/Architrave';
 import DoorOrientation from '../pages/doororientation/DoorOrientation';
 import FrameSize from '../pages/framesize/FrameSize';
@@ -54,8 +54,8 @@ const MainRoutes = {
     element:<DoorThersold/>
    },
    {
-    path:'jamp-location',
-    element:<JampLocation/>
+    path:'jamb-location',
+    element:<JambLocation/>
    },
    {
     path:'architrave',

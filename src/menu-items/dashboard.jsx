@@ -53,10 +53,10 @@ const dashboard = {
     breadcrumbs:false
   },
   {
-    id :'jamp-location',
-    title:'Jamp Location',
+    id :'jamb-location',
+    title:'Jamb Location',
     type:'item',
-    url:'/jamp-location',
+    url:'/jamb-location',
     icon: icons.DashboardOutlined,
     breadcrumbs:false
   },
