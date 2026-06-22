@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  getJambLocation,
-  createJambLocation,
-  updateJambLocation,
-} from "../../services/doorjambLocationService";
+import {getDoorJambLocation,createDoorJambLocation,updateDoorJambLocation,} from "../../services/doorjambLocationService";
 import { useToast } from "../../contexts/ToastContext";
 
 const JambLocation = () => {

@@ -29,14 +29,18 @@ const dashboard = {
     url: '/door-location',
     icon: icons.DashboardOutlined,
     breadcrumbs: false
-  },{
+  },
+  
+  {
     id :'door-frame',
     title:'Door Frame',
     type:'item',
     url:'/door-frame',
     icon: icons.DashboardOutlined,
     breadcrumbs:false
-  },{
+  },
+  
+  {
     id :'door-thickness',
     title:'Door Thickness',
     type:'item',
@@ -60,15 +64,15 @@ const dashboard = {
     icon: icons.DashboardOutlined,
     breadcrumbs:false
   },
-  {
+  // {
     
-    id :'architrave',
-    title:'Architrave',
-    type:'item',
-    url:'/architrave',
-    icon: icons.DashboardOutlined,
-    breadcrumbs:false
-  },
+  //   id :'architrave',
+  //   title:'Architrave',
+  //   type:'item',
+  //   url:'/architrave',
+  //   icon: icons.DashboardOutlined,
+  //   breadcrumbs:false
+  // },
   {
     id :'door-orientation',
     title:'Door Orientation',
@@ -77,14 +81,16 @@ const dashboard = {
     icon: icons.DashboardOutlined,
     breadcrumbs:false
   },
-  {
-    id :'frame-size',
-    title:'Frame Size',
-    type:'item',
-    url:'/frame-size',
-    icon: icons.DashboardOutlined,
-    breadcrumbs:false
-  },
+
+  // {
+  //   id :'frame-size',
+  //   title:'Frame Size',
+  //   type:'item',
+  //   url:'/frame-size',
+  //   icon: icons.DashboardOutlined,
+  //   breadcrumbs:false
+  // },
+
   {
     id :'dimension',
     title:'Dimension',
