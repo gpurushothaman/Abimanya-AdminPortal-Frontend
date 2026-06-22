@@ -10,5 +10,6 @@
   DOOR_ORIENTATION:"/door-orientation",
   DOOR_JAMB_LOCATION:"/door-jamb-location",
   DOOR_FRAME: "/door-frame",
+  DESIGN: "/design",
   DOOR_THRESHOLD:"/door-threshold"
 };
