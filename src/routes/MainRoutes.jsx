@@ -6,11 +6,11 @@ import DashboardLayout from 'layout/Dashboard';
 import AuthGuard from "./AuthGuard";
 import DoorLocation from '../pages/doorlocation/DoorLocation';
 import DoorThreshold from '../pages/doorthreshold/DoorThreshold';
-import DoorFrame from '../pages/doorframe/DoorFrame';
+ import DoorFrame from '../pages/doorframe/DoorFrame';
 import JambLocation from "../pages/jamblocation/JambLocation";
-import Architrave from '../pages/architrave/Architrave';
+// import Architrave from '../pages/architrave/Architrave';
 import DoorOrientation from '../pages/doororientation/DoorOrientation';
-import FrameSize from '../pages/framesize/FrameSize';
+ // import FrameSize from '../pages/framesize/FrameSize';
 import DoorThickNess from '../pages/doorthickness/DoorThickness';
 import Dimension from '../pages/dimension/Dimension';
 
@@ -56,18 +56,18 @@ const MainRoutes = {
     path:'jamb-location',
     element:<JambLocation/>
    },
-   {
-    path:'architrave',
-    element:<Architrave/>
-   },
+  //  {
+  //   path:'architrave',
+  //   element:<Architrave/>
+  //  },
    {
     path:'door-orientation',
     element:<DoorOrientation/>
    },
-   {
-    path:'frame-size',
-    element:<FrameSize/>
-   },
+  //  {
+  //   path:'frame-size',
+  //   element:<FrameSize/>
+  //  },
    {
     path:'dimension',
     element:<Dimension/>
