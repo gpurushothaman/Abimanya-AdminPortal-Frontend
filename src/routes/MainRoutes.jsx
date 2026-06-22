@@ -5,9 +5,8 @@ import Loadable from 'components/Loadable';
 import DashboardLayout from 'layout/Dashboard';
 import AuthGuard from "./AuthGuard";
 import DoorLocation from '../pages/doorlocation/DoorLocation';
-import DoorThresold from '../pages/thersold/DoorThresold';
+import DoorThreshold from '../pages/doorthreshold/DoorThreshold';
 import DoorFrame from '../pages/doorframe/DoorFrame';
-import DoorThersold from '../pages/thersold/DoorThresold';
 import JambLocation from "../pages/jamblocation/JambLocation";
 import Architrave from '../pages/architrave/Architrave';
 import DoorOrientation from '../pages/doororientation/DoorOrientation';
@@ -50,8 +49,8 @@ const MainRoutes = {
     element:<DoorThickNess/>
    },
    {
-    path:'door-thersold',
-    element:<DoorThersold/>
+    path:'door-threshold',
+    element:<DoorThreshold/>
    },
    {
     path:'jamb-location',
