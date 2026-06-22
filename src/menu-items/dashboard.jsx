@@ -45,10 +45,10 @@ const dashboard = {
     breadcrumbs:false
   },
   {
-    id :'door-thersold',
-    title:'Door Thersold',
+    id :'door-threshold',
+    title:'Door Threshold',
     type:'item',
-    url:'/door-thersold',
+    url:'/door-threshold',
     icon: icons.DashboardOutlined,
     breadcrumbs:false
   },
