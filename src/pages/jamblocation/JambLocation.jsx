@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {getDoorJambLocation,createDoorJambLocation,updateDoorJambLocation,} from "../../services/doorjambLocationService";
+import { getDoorJambLocation, updateDoorJambLocation, } from "../../services/doorjambLocationService";
 import { useToast } from "../../contexts/ToastContext";
 
 const JambLocation = () => {
   const { showToast } = useToast();
-  const [newLocation, setNewLocation] = useState("");
-  const [locationValue, setLocationValue] = useState("");
   const [options, setOptions] = useState([]);
 
-  //  FETCH function get a data from user
+
   useEffect(() => {
     fetchJambLocation();
   }, []);
@@ -20,49 +18,79 @@ const JambLocation = () => {
       console.error(error);
     }
   };
-  // HANDLEDIT function for edit something for user
-  const handleEdit = async (id) => {
-    const selected = options.find((item) => item._id === id);
-    if (selected.editing) {
+
+
+
+
+  const saveLocation = async (
+    flag,
+    opt,
+    updateId
+  ) => {
+    if (flag) {
       try {
-        await updateDoorJambLocation(id, { jambLocationName: selected.jambLocationName, jambLocationValue: selected.jambLocationValue, });
-        showToast("Jamb Location Updated Successfully", "success");
-      }
-      catch (error) {
-        showToast("Update Failed", "error");
-        return;
+        const result =
+          opt.filter(
+            (item) => item._id === updateId
+          )?.[0];
+
+        const response =
+          await updateDoorJambLocation(
+            updateId,
+            result
+          );
+
+        if (response?.data?.success) {
+          showToast(
+            "Location option updated successfully",
+            "success"
+          );
+        } else {
+          showToast(
+            "Location option not updated",
+            "error"
+          );
+        }
+      } catch (error) {
+        console.error(error);
+        showToast(
+          "Something went wrong",
+          "error"
+        );
       }
     }
-    setOptions(options.map((item) => item._id === id ? { ...item, editing: !item.editing, } : item));
   };
-  // HANDLE function for change value from user
+
+  const handleEdit = (id, flag) => {
+    setOptions(
+      options.map((item) =>
+        item._id === id
+          ? {
+            ...item,
+            editing: !item.editing,
+          }
+          : item
+      )
+    );
+
+    saveLocation(
+      flag,
+      options,
+      id
+    );
+  };
+
+
+
+
+
   const handleChange = (id, value) => {
     setOptions(options.map((item) => item._id === id ? { ...item, jambLocationName: value, } : item));
   };
-  // HANDLECHANGE function for user change the value
-  const handleValueChange = (id, value) => {
-    setOptions(options.map((item) => item._id === id ? { ...item, jambLocationValue: value, } : item));
-  };
-  // HANDLESAVE function for add user value in dadabase
-  const handleSave = async () => {
-    if (!newLocation.trim()) {
-      showToast("Enter Jamb Location Name", "error");
-      return;
-    }
-    if (!locationValue) {
-      showToast("Select Location Value", "error");
-      return;
-    }
-    try {
-      const response = await createDoorJambLocation({ jambLocationName: newLocation, jambLocationValue: locationValue, });
-      setOptions([...options, { ...response.data.data, editing: false, },]);
-      setNewLocation("");
-      setLocationValue("");
-      showToast("Jamb Location Added Successfully", "success");
-    } catch (error) {
-      showToast("Something went wrong", "error");
-    }
-  };
+
+
+
+
 
 
 
@@ -72,19 +100,7 @@ const JambLocation = () => {
 
       <h2 style={{ marginBottom: "20px", color: "#333", fontWeight: "600", }}>Jamb Location</h2>
 
-      <div style={{ marginBottom: "20px", display: "flex", gap: "10px", }}>
-        <input type="text" placeholder="Enter Jamb Location Name" value={newLocation} onChange={(e) => setNewLocation(e.target.value)}
-          style={{ padding: "10px", width: "250px", }} />
 
-        <select value={locationValue} onChange={(e) => setLocationValue(e.target.value)}
-          style={{ padding: "10px", width: "250px", }}
-        >
-          <option value="">Enter Location</option>
-          <option value="front">Front</option>
-          <option value="back">Back</option>
-        </select>
-        <button onClick={handleSave}>Add</button>
-      </div>
 
 
 
@@ -118,23 +134,33 @@ const JambLocation = () => {
 
 
               {item.editing ? (
-                <div
+
+
+                <input
+                  type="text"
+                  value={item.jambLocationName}
+                  onChange={(e) =>
+                    handleChange(
+                      item._id,
+                      e.target.value
+                    )
+                  }
                   style={{
-                    display: "flex",
-                    gap: "10px",
+                    padding: "6px 10px",
+                    width: "200px",
+                  }}
+                />
+
+
+
+              ) : (
+                <span
+                  style={{
+                    fontSize: "15px",
                   }}
                 >
-                  <input value={item.jambLocationName} onChange={(e) => handleChange(item._id, e.target.value)} />
-                  <select value={item.jambLocationValue} onChange={(e) => handleValueChange(item._id, e.target.value)}>
-                    <option value="front">front</option>
-                    <option value="back">back</option>
-                  </select>
-                </div>
-              ) : (
-                <div style={{ display: "flex", gap: "120px", }}>
-                  <span>{item.jambLocationName}</span>
-                  <span>{item.jambLocationValue}</span>
-                </div>
+                  {item.jambLocationName}
+                </span>
               )}
             </div>
 
@@ -142,7 +168,7 @@ const JambLocation = () => {
 
 
             <div>
-              <button onClick={() => handleEdit(item._id)}
+              <button onClick={() => handleEdit(item._id, item.editing)}
                 style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "18px", marginRight: "15px", }}>
                 {item.editing ? "✔️" : "✏️"}
               </button>

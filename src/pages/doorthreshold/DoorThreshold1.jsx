@@ -60,11 +60,9 @@ const DoorThreshold = () => {
       return;
     }
     if (!thresholdValue) {
-      showToast("Select Threshold Value", "error"
-      );
+      showToast("Select Threshold Value", "error");
       return;
     }
-
     try {
       const response = await createDoorThreshold({ thresholdName: newThreshold, thresholdValue: thresholdValue, });
       setOptions([...options, { ...response.data.data, editing: false, },]);
