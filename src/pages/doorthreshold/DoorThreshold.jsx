@@ -1,179 +1,145 @@
-import React, { useEffect, useState } from "react";
-import { getDoorThreshold, createDoorThreshold, updateDoorThreshold, } from "../../services/doorThresholdService";
-import { useToast } from "../../contexts/ToastContext";
+import React, { useState, useEffect } from 'react';
+//Toast
+import { useToast } from '../../contexts/ToastContext';
+//api
+import { getDoorThreshold, updateDoorThreshold } from '../../services/doorThresholdService';
 
 const DoorThreshold = () => {
   const { showToast } = useToast();
-  const [newThreshold, setNewThreshold] = useState("");
-  const [thresholdValue, setThresholdValue] = useState("");
   const [options, setOptions] = useState([]);
 
+  useEffect(() => {
+    getThreshold();
+  }, []);
 
-
-  useEffect(() => { fetchDoorThreshold(); }, []);
-  const fetchDoorThreshold = async () => {
+  const getThreshold = async () => {
     try {
       const response = await getDoorThreshold();
-      setOptions(response.data.data.map((item) => ({ ...item, editing: false, })));
+      if (response?.data?.success) {
+        setOptions(response?.data?.data);
+      }
     } catch (error) {
       console.error(error);
     }
   };
 
-
-
-
-  const handleEdit = async (id) => {
-    const selected = options.find((item) => item._id === id);
-    if (selected.editing) {
+  const saveDimension = async (flag, opt, updateId) => {
+    if (flag) {
       try {
-        await updateDoorThreshold(id, { thresholdName: selected.thresholdName, thresholdValue: selected.thresholdValue, });
-        showToast("Door Threshold Updated Successfully", "success");
+        const result = opt.filter((item) => item._id === updateId)?.[0];
+        const response = await updateDoorThreshold(updateId, result);
+        if (response?.data?.success) {
+          showToast('Threshold option updated successfully', 'success');
+        } else {
+          showToast('Threshold option not updated', 'error');
+        }
       } catch (error) {
-        showToast("Update Failed", "error");
-        return;
+        console.error(error);
+        showToast('Something went wrong', 'error');
       }
     }
-    setOptions(options.map((item) => item._id === id ? { ...item, editing: !item.editing, } : item));
   };
 
-
-
-
-
+  const handleEdit = (id, flag) => {
+    setOptions(options.map((item) => (item._id === id ? { ...item, editing: !item.editing } : item)));
+    saveDimension(flag, options, id);
+  };
 
   const handleChange = (id, value) => {
-    setOptions(options.map((item) => item._id === id ? { ...item, thresholdName: value, } : item));
+   
+    setOptions((prev) =>
+      prev.map((item) => {
+        if (item._id !== id) return item;
+
+        const updated = {
+          ...item,
+          thresholdName: value
+        };
+        return updated;
+      })
+    );
   };
-
-
-
-
-  const handleValueChange = (id, value) => {
-    setOptions(options.map((item) => item._id === id ? { ...item, thresholdValue: value, } : item));
-  };
-
-
-  const handleSave = async () => {
-    if (!newThreshold.trim()) {
-      showToast("Enter Threshold Name", "error");
-      return;
-    }
-    if (!thresholdValue) {
-      showToast("Select Threshold Value", "error"
-      );
-      return;
-    }
-
-    try {
-      const response = await createDoorThreshold({ thresholdName: newThreshold, thresholdValue: thresholdValue, });
-      setOptions([...options, { ...response.data.data, editing: false, },]);
-      setNewThreshold("");
-      setThresholdValue("");
-      showToast("Door Threshold Added Successfully", "success");
-    } catch (error) {
-      showToast("Something went wrong", "error");
-    }
-  };
-
-
-
 
   return (
-    <div style={{ padding: "25px" }}>
-      <h2 style={{ marginBottom: "20px",  color: "#333",  fontStyle: ""  }}>   Door Threshold  </h2>
-
-
-      <div  style={{  marginBottom: "20px",  display: "flex",  gap: "10px",  }}>
-        <input
-          type="text"
-          placeholder="Enter Threshold Name"
-          value={newThreshold}
-          onChange={(e) =>  setNewThreshold(e.target.value)  }
-          style={{  padding: "10px",  width: "250px",  }}
-        />
-
-        <select  value={thresholdValue}  onChange={(e) =>  setThresholdValue(e.target.value)  }
-          style={{  padding: "10px",  width: "250px",  }}
-        >
-          <option value="">  Enter Threshold Value  </option>
-          <option value="yes">  Yes  </option>
-          <option value="no">  No  </option>
-        </select>
-        <button onClick={handleSave}>  Add  </button>
-      </div>
-
-
-
+    <div style={{ padding: '25px' }}>
+      <h2
+        style={{
+          marginBottom: '20px',
+          color: '#333',
+          fontStyle: ''
+        }}
+      >
+        Door Threshold
+      </h2>
 
       <div
         style={{
-          width: "550px",
-          background: "#fff",
-          border: "1px solid #dcdcdc",
-          borderRadius: "8px",
-          overflow: "hidden",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+          width: '400px',
+          background: '#fff',
+          border: '1px solid #dcdcdc',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.08)'
         }}
       >
         <div
           style={{
-            padding: "14px 18px",
-            background: "#f5f5f5",
-            borderBottom: "1px solid #ddd",
-            fontWeight: "600",
-            fontSize: "16px",
+            padding: '14px 18px',
+            background: '#f5f5f5',
+            borderBottom: '1px solid #ddd',
+            fontWeight: '600',
+            fontSize: '16px'
           }}
         >
-          Threshold Options
+          Options
         </div>
 
         {options.map((item) => (
           <div
             key={item._id}
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "16px 18px",
-              borderBottom: "1px solid #eee",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 18px',
+              borderBottom: '1px solid #eee'
             }}
           >
-            <div  style={{  display: "flex",  alignItems: "center",  gap: "15px",  flex: 1,  }} >
-
-
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
+                flex: 1
+              }}
+            >
               {item.editing ? (
-                <div style={{  display: "flex",  gap: "10px",  }}>
-                  <input
-                    value={item.thresholdName}  onChange={(e) => handleChange(  item._id,e.target.value ) } />
-                  <select value={item.thresholdValue}  onChange={(e) =>  handleValueChange(  item._id,  e.target.value  )}
-                  >
-                    <option value="yes">  yes </option>
-                    <option value="no"> no</option>
-                  </select>
-                </div>
+                <input
+                  type="text"
+                  value={item.thresholdName}
+                  onChange={(e) => handleChange(item._id, e.target.value)}
+                  style={{
+                    padding: '6px 10px',
+                    width: '200px'
+                  }}
+                />
               ) : (
-                <div style={{  display: "flex",  gap: "20px",  }} >
-                  <span>  {item.thresholdName}  </span>
-                  <span>  {item.thresholdValue} </span>
-                </div>
+                <span style={{ fontSize: '15px' }}>{item.thresholdName}</span>
               )}
             </div>
 
-
-
             <div>
               <button
-                onClick={() => handleEdit(item._id)}
+                onClick={() => handleEdit(item._id, item.editing)}
                 style={{
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  fontSize: "18px",
-                  marginRight: "15px",
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  marginRight: '15px'
                 }}
               >
-                {item.editing ? "✔️" : "✏️"}
+                {item.editing ? '✔️' : '✏️'}
               </button>
             </div>
           </div>
