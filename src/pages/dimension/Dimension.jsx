@@ -3,11 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '../../contexts/ToastContext';
 //api
 import { getAllDimension, updateDimension } from '../../services/dimensionService';
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 const Dimension = () => {
   const { showToast } = useToast();
   const [options, setOptions] = useState([]);
   const [updateId, setUpdateId] = useState('');
+  const [status, setStatus] = useState(false);
 
   useEffect(() => {
     getDimension();
@@ -17,6 +20,7 @@ const Dimension = () => {
     try {
       const response = await getAllDimension();
       setUpdateId(response.data.data[0]._id);
+      setStatus(response.data.data[0].status);
       setOptions([
         { ...response.data.data[0].height, id: 'height', label: 'Height' },
         { ...response.data.data[0].width, id: 'width', label: 'Width' },
@@ -31,15 +35,16 @@ const Dimension = () => {
     if (flag) {
       try {
         let payload = {
+          status,
           height: { min: opt?.[0]?.min, max: opt?.[0]?.max },
           width: { min: opt?.[1]?.min, max: opt?.[1]?.max },
           wallThickness: { min: opt?.[2]?.min, max: opt?.[2]?.max }
         };
-        const response = await updateDimension(updateId, payload);    
-        if(response?.data?.success){
-            showToast('Dimension updated successfully', 'success');
-        }else{
-            showToast('Dimension not updated', 'error');
+        const response = await updateDimension(updateId, payload);
+        if (response?.data?.success) {
+          showToast('Dimension updated successfully', 'success');
+        } else {
+          showToast('Dimension not updated', 'error');
         }
       } catch (error) {
         console.error(error);
@@ -52,6 +57,66 @@ const Dimension = () => {
     setOptions(options.map((item) => (item.id === id ? { ...item, editing: !item.editing } : item)));
     saveDimension(flag, options);
   };
+
+
+
+
+  const handleStatusChange = async (value) => {
+    setStatus(value);
+
+    try {
+      const payload = {
+        status: value,
+
+        height: {
+          min: options?.[0]?.min,
+          max: options?.[0]?.max
+        },
+
+        width: {
+          min: options?.[1]?.min,
+          max: options?.[1]?.max
+        },
+
+        wallThickness: {
+          min: options?.[2]?.min,
+          max: options?.[2]?.max
+        }
+      };
+
+      const response =
+        await updateDimension(
+          updateId,
+          payload
+        );
+
+      if (response?.data?.success) {
+        showToast(
+          "Status updated successfully",
+          "success"
+        );
+      } else {
+        showToast(
+          "Status update failed",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error(error);
+
+      showToast(
+        "Something went wrong",
+        "error"
+      );
+    }
+  };
+
+
+
+
+
+
+
 
   const handleChange = (id, value, type) => {
     if (!/^\d*$/.test(value)) return;
@@ -98,14 +163,38 @@ const Dimension = () => {
       >
         <div
           style={{
-            padding: '14px 18px',
-            background: '#f5f5f5',
-            borderBottom: '1px solid #ddd',
-            fontWeight: '600',
-            fontSize: '16px'
+            padding: "14px 18px",
+            background: "#f5f5f5",
+            borderBottom: "1px solid #ddd",
+            fontWeight: "600",
+            fontSize: "16px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
           }}
         >
-          Set ( Min / Max )
+          <span>
+            Set ( Min / Max )
+          </span>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={status}
+                onChange={(e) =>
+                  handleStatusChange(
+                    e.target.checked
+                  )
+                }
+                color="success"
+              />
+            }
+            label={
+              status
+                ? "Active"
+                : "Inactive"
+            }
+          />
         </div>
 
         {options.map((item) => (

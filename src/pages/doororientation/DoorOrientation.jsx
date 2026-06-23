@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { getDoorOrientation,  updateDoorOrientation, } from "../../services/doorOrientationService";
+import { getDoorOrientation, updateDoorOrientation, } from "../../services/doorOrientationService";
 import { useToast } from '../../contexts/ToastContext';
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 
 const DoorOrientation = () => {
@@ -22,18 +24,17 @@ const DoorOrientation = () => {
 
 
 
-  const saveOrientation = async (flag, opt, updateId) => {
+  const saveOrientation = async (
+    flag,
+    data,
+    updateId
+  ) => {
     if (flag) {
       try {
-        const result =
-          opt.filter(
-            (item) => item._id === updateId
-          )?.[0];
-
         const response =
           await updateDoorOrientation(
             updateId,
-            result
+            data
           );
 
         if (response?.data?.success) {
@@ -69,9 +70,15 @@ const DoorOrientation = () => {
           : item
       )
     );
+
+    const result =
+      options.find(
+        (item) => item._id === id
+      );
+
     saveOrientation(
       flag,
-      options,
+      result,
       id
     );
   };
@@ -80,17 +87,39 @@ const DoorOrientation = () => {
 
 
 
-
-  const handleChange = (id, value) => {
+  const handleChange = (
+    id,
+    value,
+    category
+  ) => {
     setOptions((prev) =>
       prev.map((item) => {
         if (item._id !== id)
           return item;
 
-        return {
-          ...item,
-          DoorOrientationname: value
-        };
+        if (category === "data") {
+          return {
+            ...item,
+            DoorOrientationname: value,
+          };
+        }
+
+        if (category === "status") {
+          const updated = {
+            ...item,
+            status: value,
+          };
+
+          saveOrientation(
+            true,
+            updated,
+            id
+          );
+
+          return updated;
+        }
+
+        return item;
       })
     );
   };
@@ -169,7 +198,7 @@ const DoorOrientation = () => {
                     type="text"
                     value={item.DoorOrientationname}
                     onChange={(e) =>
-                      handleChange(item._id, e.target.value)
+                      handleChange(item._id, e.target.value, "data")
                     }
                     style={{
                       padding: "6px 10px",
@@ -195,7 +224,12 @@ const DoorOrientation = () => {
 
             <div>
               <button
-                onClick={() => handleEdit(item._id, item.editing)}
+                onClick={() =>
+                  handleEdit(
+                    item._id,
+                    item.editing
+                  )
+                }
                 style={{
                   border: "none",
                   background: "transparent",
@@ -207,8 +241,34 @@ const DoorOrientation = () => {
                 {item.editing ? "✔️" : "✏️"}
               </button>
 
-
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={
+                      item?.status || false
+                    }
+                    onChange={(e) =>
+                      handleChange(
+                        item._id,
+                        e.target.checked,
+                        "status"
+                      )
+                    }
+                    color="success"
+                  />
+                }
+                label={
+                  item?.status
+                    ? "Active"
+                    : "Inactive"
+                }
+              />
             </div>
+
+
+
+
+
           </div>
         ))}
       </div>

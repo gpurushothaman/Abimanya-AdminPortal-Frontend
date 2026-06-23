@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-
 import { getDoorThickness, createDoorThickness, updateDoorThickness, deleteDoorThickness } from '../../services/doorThicknessService';
 import { useToast } from '../../contexts/ToastContext';
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 const DoorThickNess = () => {
   const { showToast } = useToast();
@@ -37,7 +38,8 @@ const DoorThickNess = () => {
       try {
         const { data } = await updateDoorThickness(id, {
           DoorThicknessname: selected.DoorThicknessname,
-          DoorThicknessvalue: Number(selected.DoorThicknessvalue)
+          DoorThicknessvalue: Number(selected.DoorThicknessvalue),
+          status: selected.status
         });
         if (data.success) {
           showToast('Door thickness updated successfully', 'success');
@@ -72,6 +74,57 @@ const DoorThickNess = () => {
             ? { ...item, DoorThicknessvalue: value }
             : item
         )
+      );
+    }
+  };
+  const handleStatusChange = async (
+    id,
+    value
+  ) => {
+    setOptions((prev) =>
+      prev.map((item) => {
+        if (item._id !== id)
+          return item;
+
+        return {
+          ...item,
+          status: value
+        };
+      })
+    );
+
+    try {
+      const current =
+        options.find(
+          (item) => item._id === id
+        );
+
+      const response =
+        await updateDoorThickness(
+          id,
+          {
+            ...current,
+            status: value
+          }
+        );
+
+      if (response?.data?.success) {
+        showToast(
+          "Status updated successfully",
+          "success"
+        );
+      } else {
+        showToast(
+          "Status update failed",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error(error);
+
+      showToast(
+        "Something went wrong",
+        "error"
       );
     }
   };
@@ -119,7 +172,7 @@ const DoorThickNess = () => {
     try {
       const response = await createDoorThickness({
         DoorThicknessname: newThickness,
-        DoorThicknessvalue: thicknessValue
+        DoorThicknessvalue: thicknessValue,
       });
       console.log(response.data.data);
       setOptions([
@@ -216,7 +269,7 @@ const DoorThickNess = () => {
 
       <div
         style={{
-          width: '600px',
+          width: '700px',
           background: '#fff',
           border: '1px solid #dcdcdc',
           borderRadius: '8px',
@@ -295,24 +348,27 @@ const DoorThickNess = () => {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "12px"
+                    flex: 1,
+                    gap: "80px"
                   }}
                 >
-                  <div
+                  <span
                     style={{
-                      width: "220px"
+                      fontSize: "15px",
+                      minWidth: "150px"
                     }}
                   >
                     {item.DoorThicknessname}
-                  </div>
+                  </span>
 
-                  <div
+                  <span
                     style={{
-                      width: "220px"
+                      fontSize: "15px",
+                      minWidth: "80px"
                     }}
                   >
                     {item.DoorThicknessvalue}
-                  </div>
+                  </span>
                 </div>
               )}
 
@@ -321,8 +377,9 @@ const DoorThickNess = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
-                flexShrink: 0
+                justifyContent: "flex-end",
+                gap: "12px",
+                minWidth: "320px"
               }}
             >
               <button
@@ -336,6 +393,33 @@ const DoorThickNess = () => {
               >
                 {item.editing ? '✔️' : '✏️'}
               </button>
+
+
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={
+                      item?.status || false
+                    }
+                    onChange={(e) =>
+                      handleStatusChange(
+                        item._id,
+                        e.target.checked
+                      )
+                    }
+                    color="success"
+                  />
+                }
+                label={
+                  item?.status
+                    ? "Active"
+                    : "Inactive"
+                }
+              />
+
+
+
 
               <button
                 onClick={() => handleDelete(item._id)}

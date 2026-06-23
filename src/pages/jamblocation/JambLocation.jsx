@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getDoorJambLocation, updateDoorJambLocation, } from "../../services/doorjambLocationService";
 import { useToast } from "../../contexts/ToastContext";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 const JambLocation = () => {
   const { showToast } = useToast();
@@ -21,23 +23,18 @@ const JambLocation = () => {
 
 
 
-
   const saveLocation = async (
     flag,
-    opt,
+    data,
     updateId
   ) => {
     if (flag) {
       try {
-        const result =
-          opt.filter(
-            (item) => item._id === updateId
-          )?.[0];
 
         const response =
           await updateDoorJambLocation(
             updateId,
-            result
+            data
           );
 
         if (response?.data?.success) {
@@ -53,6 +50,7 @@ const JambLocation = () => {
         }
       } catch (error) {
         console.error(error);
+
         showToast(
           "Something went wrong",
           "error"
@@ -73,9 +71,14 @@ const JambLocation = () => {
       )
     );
 
+    const result =
+      options.find(
+        (item) => item._id === id
+      );
+
     saveLocation(
       flag,
-      options,
+      result,
       id
     );
   };
@@ -84,8 +87,32 @@ const JambLocation = () => {
 
 
 
-  const handleChange = (id, value) => {
-    setOptions(options.map((item) => item._id === id ? { ...item, jambLocationName: value, } : item));
+  const handleChange = (id, value, category) => {
+    setOptions((prev) =>
+      prev.map((item) => {
+        if (item._id !== id) return item;
+
+        if (category === "data") {
+          return {
+            ...item,
+            jambLocationName: value,
+          };
+        }
+
+        if (category === "status") {
+          const updated = {
+            ...item,
+            status: value,
+          };
+
+          saveLocation(true, updated, id);
+
+          return updated;
+        }
+
+        return item;
+      })
+    );
   };
 
 
@@ -142,7 +169,7 @@ const JambLocation = () => {
                   onChange={(e) =>
                     handleChange(
                       item._id,
-                      e.target.value
+                      e.target.value, "data"
                     )
                   }
                   style={{
@@ -168,13 +195,51 @@ const JambLocation = () => {
 
 
             <div>
-              <button onClick={() => handleEdit(item._id, item.editing)}
-                style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "18px", marginRight: "15px", }}>
+              <button
+                onClick={() =>
+                  handleEdit(
+                    item._id,
+                    item.editing
+                  )
+                }
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  fontSize: "18px",
+                  marginRight: "15px",
+                }}
+              >
                 {item.editing ? "✔️" : "✏️"}
               </button>
 
-
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={item?.status}
+                    onChange={(e) =>
+                      handleChange(
+                        item._id,
+                        e.target.checked,
+                        "status"
+                      )
+                    }
+                    color="success"
+                  />
+                }
+                label={
+                  item?.status
+                    ? "Active"
+                    : "Inactive"
+                }
+              />
             </div>
+
+
+
+
+
+
           </div>
         ))}
       </div>
