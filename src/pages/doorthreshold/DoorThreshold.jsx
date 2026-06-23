@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
 //Toast
 import { useToast } from '../../contexts/ToastContext';
 //api
@@ -11,6 +13,10 @@ const DoorThreshold = () => {
   useEffect(() => {
     getThreshold();
   }, []);
+
+  useEffect(() => {
+
+  }, [options]);
 
   const getThreshold = async () => {
     try {
@@ -25,9 +31,8 @@ const DoorThreshold = () => {
 
   const saveDimension = async (flag, opt, updateId) => {
     if (flag) {
-      try {
-        const result = opt.filter((item) => item._id === updateId)?.[0];
-        const response = await updateDoorThreshold(updateId, result);
+      try {        
+        const response = await updateDoorThreshold(updateId, opt);
         if (response?.data?.success) {
           showToast('Threshold option updated successfully', 'success');
         } else {
@@ -42,22 +47,32 @@ const DoorThreshold = () => {
 
   const handleEdit = (id, flag) => {
     setOptions(options.map((item) => (item._id === id ? { ...item, editing: !item.editing } : item)));
-    saveDimension(flag, options, id);
+    const result = options.filter((item) => item._id === id)?.[0];
+    saveDimension(flag, result, id);
   };
 
-  const handleChange = (id, value) => {
-   
+  const handleChange = (id, value, category) => { 
     setOptions((prev) =>
       prev.map((item) => {
         if (item._id !== id) return item;
 
-        const updated = {
-          ...item,
-          thresholdName: value
-        };
-        return updated;
+        if (category === 'data') {
+          const updated = {
+            ...item,
+            thresholdName: value
+          };
+          return updated;
+        } else if (category === 'status') {
+          const updated = {
+            ...item,
+            status: value
+          };  
+          saveDimension(true, updated, id);        
+          return updated;      
+        }
       })
     );
+  
   };
 
   return (
@@ -117,7 +132,7 @@ const DoorThreshold = () => {
                 <input
                   type="text"
                   value={item.thresholdName}
-                  onChange={(e) => handleChange(item._id, e.target.value)}
+                  onChange={(e) => handleChange(item._id, e.target.value, 'data')}
                   style={{
                     padding: '6px 10px',
                     width: '200px'
@@ -141,6 +156,13 @@ const DoorThreshold = () => {
               >
                 {item.editing ? '✔️' : '✏️'}
               </button>
+
+              <FormControlLabel
+                control={
+                  <Switch checked={item?.status} onChange={(e) => handleChange(item._id, e.target.checked, 'status')} color="success" />
+                }
+                label={item?.status ? 'Active' : 'Inactive'}
+              />
             </div>
           </div>
         ))}
