@@ -98,8 +98,14 @@ const dashboard = {
     icon: icons.DashboardOutlined,
     breadcrumbs:false
   },
-
-
+  {
+    id :'sub-designs',
+    title:'Door Sub Designs',
+    type:'item',
+    url:'/sub-designs',
+    icon: icons.DashboardOutlined,
+    breadcrumbs:false
+  },
   {
     id :'dimension',
     title:'Dimension',

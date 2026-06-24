@@ -11,5 +11,6 @@
   DOOR_JAMB_LOCATION:"/door-jamb-location",
   DOOR_FRAME: "/door-frame",
   DOOR_DESIGN: "/door-design",
-  DOOR_THRESHOLD:"/door-threshold"
+  DOOR_THRESHOLD:"/door-threshold",
+  DOOR_SUB_DESIGN:"/door-sub-design"
 };

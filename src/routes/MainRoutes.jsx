@@ -14,6 +14,7 @@ import DoorOrientation from '../pages/doororientation/DoorOrientation';
 import DoorThickNess from '../pages/doorthickness/DoorThickness';
 import Dimension from '../pages/dimension/Dimension';
 import DoorDesign from '../pages/doordesign/DoorDesign';
+import SubDesign from '../pages/doorsubdesign/SubDesign';
 
 // render- Dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -72,6 +73,10 @@ const MainRoutes = {
      {
     path:'door-designs',
     element:<DoorDesign/>
+   },
+    {
+    path:'sub-designs',
+    element:<SubDesign/>
    },
   
    {
