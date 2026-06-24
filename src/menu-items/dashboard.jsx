@@ -90,6 +90,15 @@ const dashboard = {
   //   icon: icons.DashboardOutlined,
   //   breadcrumbs:false
   // },
+ {
+    id :'door-designs',
+    title:'Door Designs',
+    type:'item',
+    url:'/door-designs',
+    icon: icons.DashboardOutlined,
+    breadcrumbs:false
+  },
+
 
   {
     id :'dimension',

@@ -13,6 +13,7 @@ import DoorOrientation from '../pages/doororientation/DoorOrientation';
  // import FrameSize from '../pages/framesize/FrameSize';
 import DoorThickNess from '../pages/doorthickness/DoorThickness';
 import Dimension from '../pages/dimension/Dimension';
+import DoorDesign from '../pages/doordesign/DoorDesign';
 
 // render- Dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -68,6 +69,11 @@ const MainRoutes = {
   //   path:'frame-size',
   //   element:<FrameSize/>
   //  },
+     {
+    path:'door-designs',
+    element:<DoorDesign/>
+   },
+  
    {
     path:'dimension',
     element:<Dimension/>
