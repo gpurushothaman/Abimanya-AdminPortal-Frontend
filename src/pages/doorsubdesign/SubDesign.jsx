@@ -9,14 +9,22 @@ import { getDoorSubDesign, updateDoorSubDesign } from '../../services/doorSubDes
 const SubDesign = () => {
   const { showToast } = useToast();
   const [options, setOptions] = useState([]);
+  const [selectedDesign, setSelectedDesign] = useState('');
 
   useEffect(() => {
     getSubDesign();
   }, []);
 
-  useEffect(() => {
-
-  }, [options]);
+useEffect(() => {
+  if (
+    options.length > 0 &&
+    !selectedDesign
+  ) {
+    setSelectedDesign(
+      options[0]?.designId?.designName
+    );
+  }
+}, [options]);
 
   const getSubDesign = async () => {
     try {
@@ -28,6 +36,29 @@ const SubDesign = () => {
       console.error(error);
     }
   };
+
+
+
+const designOptions = [
+  ...new Set(
+    options.map(
+      (item) => item.designId?.designName
+    )
+  )
+];
+
+
+
+
+
+const filteredOptions = options.filter(
+  (item) =>
+    item.designId?.designName?.toLowerCase() ===
+    selectedDesign.toLowerCase()
+);
+
+
+
 
   const saveDimension = async (flag, opt, updateId) => {
     if (flag) {
@@ -100,6 +131,36 @@ const handleEdit = (id, editing) => {
         Door Sub Design
       </h2>
 
+
+
+      <div style={{ marginBottom: '20px' }}>
+
+<select
+  value={selectedDesign}
+  onChange={(e) =>
+    setSelectedDesign(e.target.value)
+  }
+  style={{
+    padding: '8px 12px',
+    width: '200px',
+    borderRadius: '5px',
+    border: '1px solid #ccc'
+  }}
+>
+  {designOptions.map((design) => (
+    <option
+      key={design}
+      value={design}
+    >
+      {design}
+    </option>
+  ))}
+</select>
+
+
+
+</div>
+
       <div
         style={{
           width: '700px',
@@ -123,7 +184,7 @@ const handleEdit = (id, editing) => {
           Sub Design Options
         </div>
 
-        {options.map((item) => (
+        {filteredOptions.map((item) => (
           <div
             key={item._id}
             style={{
