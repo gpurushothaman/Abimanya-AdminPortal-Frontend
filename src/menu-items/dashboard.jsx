@@ -113,6 +113,14 @@ const dashboard = {
     url:'/dimension',
     icon: icons.DiffTwoTone,
     breadcrumbs:false
+  },
+  {
+    id :'door-models',
+    title:'Door Models',
+    type:'item',
+    url:'/door-models',
+    icon: icons.DiffTwoTone,
+    breadcrumbs:false
   }
   ]
 };

@@ -15,6 +15,7 @@ import DoorThickNess from '../pages/doorthickness/DoorThickness';
 import Dimension from '../pages/dimension/Dimension';
 import DoorDesign from '../pages/doordesign/DoorDesign';
 import SubDesign from '../pages/doorsubdesign/SubDesign';
+import DoorModel from '../pages/doormodel/DoorModel';
 
 // render- Dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -78,11 +79,15 @@ const MainRoutes = {
     path:'sub-designs',
     element:<SubDesign/>
    },
-  
+    {
+    path:'door-models',
+    element:<DoorModel/>
+   },
    {
     path:'dimension',
     element:<Dimension/>
    }
+   
     
   ]
 };

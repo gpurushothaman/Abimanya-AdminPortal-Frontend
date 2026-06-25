@@ -12,5 +12,6 @@
   DOOR_FRAME: "/door-frame",
   DOOR_DESIGN: "/door-design",
   DOOR_THRESHOLD:"/door-threshold",
-  DOOR_SUB_DESIGN:"/door-sub-design"
+  DOOR_SUB_DESIGN:"/door-sub-design",
+  DOOR_MODEL:"/door-models"
 };
