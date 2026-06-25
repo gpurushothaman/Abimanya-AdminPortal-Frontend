@@ -15,16 +15,11 @@ const SubDesign = () => {
     getSubDesign();
   }, []);
 
-useEffect(() => {
-  if (
-    options.length > 0 &&
-    !selectedDesign
-  ) {
-    setSelectedDesign(
-      options[0]?.designId?.designName
-    );
-  }
-}, [options]);
+  useEffect(() => {
+    if (options.length > 0 && !selectedDesign) {
+      setSelectedDesign(options[0]?.designId?.designValue);
+    }
+  }, [options]);
 
   const getSubDesign = async () => {
     try {
@@ -37,32 +32,25 @@ useEffect(() => {
     }
   };
 
-
-
-const designOptions = [
-  ...new Set(
-    options.map(
-      (item) => item.designId?.designName
-    )
-  )
-];
-
-
-
-
-
-const filteredOptions = options.filter(
-  (item) =>
-    item.designId?.designName?.toLowerCase() ===
-    selectedDesign.toLowerCase()
-);
-
-
-
+  const designOptions = [
+    ...new Map(
+      options.map(item => [
+        item.designId.designValue,
+        {
+          label: item.designId.designName,
+          value: item.designId.designValue
+        }
+      ])
+    ).values()
+  ];
+  
+  const filteredOptions = options.filter(
+    item => item.designId?.designValue === selectedDesign
+  );
 
   const saveDimension = async (flag, opt, updateId) => {
     if (flag) {
-      try {        
+      try {
         const response = await updateDoorSubDesign(updateId, opt);
         if (response?.data?.success) {
           showToast('Sub Design option updated successfully', 'success');
@@ -76,26 +64,24 @@ const filteredOptions = options.filter(
     }
   };
 
-const handleEdit = (id, editing) => {
-  const item = options.find(
-    (x) => x._id === id
-  );
-  if (editing) {
-    saveDimension(true, item, id);
-  }
-  setOptions(
-    options.map((item) =>
-      item._id === id
-        ? {
-            ...item,
-            editing: !item.editing
-          }
-        : item
-    )
-  );
-};
+  const handleEdit = (id, editing) => {
+    const item = options.find((x) => x._id === id);
+    if (editing) {
+      saveDimension(true, item, id);
+    }
+    setOptions(
+      options.map((item) =>
+        item._id === id
+          ? {
+              ...item,
+              editing: !item.editing
+            }
+          : item
+      )
+    );
+  };
 
-  const handleChange = (id, value, category) => { 
+  const handleChange = (id, value, category) => {
     setOptions((prev) =>
       prev.map((item) => {
         if (item._id !== id) return item;
@@ -110,13 +96,12 @@ const handleEdit = (id, editing) => {
           const updated = {
             ...item,
             status: value
-          };  
-          saveDimension(true, updated, id);        
-          return updated;      
+          };
+          saveDimension(true, updated, id);
+          return updated;
         }
       })
     );
-  
   };
 
   return (
@@ -131,35 +116,24 @@ const handleEdit = (id, editing) => {
         Door Sub Design
       </h2>
 
-
-
       <div style={{ marginBottom: '20px' }}>
-
-<select
-  value={selectedDesign}
-  onChange={(e) =>
-    setSelectedDesign(e.target.value)
-  }
-  style={{
-    padding: '8px 12px',
-    width: '200px',
-    borderRadius: '5px',
-    border: '1px solid #ccc'
-  }}
->
-  {designOptions.map((design) => (
-    <option
-      key={design}
-      value={design}
-    >
-      {design}
-    </option>
-  ))}
-</select>
-
-
-
-</div>
+        <select
+          value={selectedDesign}
+          onChange={(e) => setSelectedDesign(e.target.value)}
+          style={{
+            padding: '8px 12px',
+            width: '200px',
+            borderRadius: '5px',
+            border: '1px solid #ccc'
+          }}
+        >
+          {designOptions.map((design) => (
+            <option key={design?.value} value={design?.value}>
+              {design?.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div
         style={{
@@ -202,49 +176,37 @@ const handleEdit = (id, editing) => {
                 flex: 1
               }}
             >
-
               <div
-  style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: '25px',
-    flex: 1
-  }}
->
-  <span
-    style={{
-      width: '150px',
-      fontWeight: '600'
-    }}
-  >
-    {item.designId?.designName}
-  </span>
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '25px',
+                  flex: 1
+                }}
+              >
+                <span
+                  style={{
+                    width: '150px',
+                    fontWeight: '600'
+                  }}
+                >
+                  {item.designId?.designName}
+                </span>
 
-  {item.editing ? (
-    <input
-      type="text"
-      value={item.subDesignName}
-      onChange={(e) =>
-        handleChange(
-          item._id,
-          e.target.value,
-          'data'
-        )
-      }
-      style={{
-        padding: '6px 10px',
-        width: '200px'
-      }}
-    />
-  ) : (
-    <span>
-      {item.subDesignName}
-    </span>
-  )}
-</div>
-
-
-
+                {item.editing ? (
+                  <input
+                    type="text"
+                    value={item.subDesignName}
+                    onChange={(e) => handleChange(item._id, e.target.value, 'data')}
+                    style={{
+                      padding: '6px 10px',
+                      width: '200px'
+                    }}
+                  />
+                ) : (
+                  <span>{item.subDesignName}</span>
+                )}
+              </div>
             </div>
 
             <div>

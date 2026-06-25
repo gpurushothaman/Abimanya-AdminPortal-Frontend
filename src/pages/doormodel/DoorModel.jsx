@@ -15,16 +15,11 @@ const DoorModel = () => {
     getModels();
   }, []);
 
-useEffect(() => {
-  if (
-    options.length > 0 &&
-    !selectedSubDesign
-  ) {
-    setSelectedSubDesign(
-      options[0]?.subDesignId?.subDesignName
-    );
-  }
-}, [options]);
+  useEffect(() => {
+    if (options.length > 0 && !selectedSubDesign) {
+      setSelectedSubDesign(options[0]?.subDesignId?.subDesignValue);
+    }
+  }, [options]);
 
   const getModels = async () => {
     try {
@@ -39,28 +34,19 @@ useEffect(() => {
   };
 
 
- const subDesignOptions = [
-  ...new Set(
-    options.map(
-      (item) =>
-        item.subDesignId?.subDesignName
-    )
-  )
-]; 
+  const subDesignOptions = [
+    ...new Map(
+      options.map((item) => [
+        item.subDesignId?.subDesignValue,
+        {
+          label: item.subDesignId?.subDesignName,
+          value: item.subDesignId?.subDesignValue,
+        },
+      ])
+    ).values(),
+  ];
 
-
-
-
-
-const filteredOptions = options.filter(
-  (item) =>
-    item.subDesignId?.subDesignName?.toLowerCase() ===
-    selectedSubDesign.toLowerCase()
-);
-
-
-
-
+  const filteredOptions = options.filter((item) => item.subDesignId?.subDesignValue?.toLowerCase() === selectedSubDesign.toLowerCase());
 
   const saveDimension = async (flag, opt, updateId) => {
     if (flag) {
@@ -130,45 +116,24 @@ const filteredOptions = options.filter(
         Door Models
       </h2>
 
-
-<div style={{ marginBottom: '20px' }}>
-
-<select
-  value={selectedSubDesign}
-  onChange={(e) =>
-    setSelectedSubDesign(
-      e.target.value
-    )
-  }
-  style={{
-    padding: '8px 12px',
-    width: '220px',
-    borderRadius: '5px',
-    border: '1px solid #ccc'
-  }}
->
-  {subDesignOptions.map(
-    (subDesign) => (
-      <option
-        key={subDesign}
-        value={subDesign}
-      >
-        {subDesign}
-      </option>
-    )
-  )}
-</select>
-
-
-
-</div>
-
-
-
-
-
-
-
+      <div style={{ marginBottom: '20px' }}>
+        <select
+          value={selectedSubDesign}
+          onChange={(e) => setSelectedSubDesign(e.target.value)}
+          style={{
+            padding: '8px 12px',
+            width: '220px',
+            borderRadius: '5px',
+            border: '1px solid #ccc'
+          }}
+        >
+          {subDesignOptions.map((subDesign) => (
+            <option key={subDesign?.value} value={subDesign?.value}>
+              {subDesign?.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div
         style={{
@@ -193,7 +158,7 @@ const filteredOptions = options.filter(
           Door Model Options
         </div>
 
-      {filteredOptions.map((item) => (
+        {filteredOptions.map((item) => (
           <div
             key={item._id}
             style={{
