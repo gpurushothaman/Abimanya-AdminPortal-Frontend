@@ -14,9 +14,7 @@ const DoorModel = () => {
     getModels();
   }, []);
 
-  useEffect(() => {
-
-  }, [options]);
+  useEffect(() => {}, [options]);
 
   const getModels = async () => {
     try {
@@ -32,7 +30,7 @@ const DoorModel = () => {
 
   const saveDimension = async (flag, opt, updateId) => {
     if (flag) {
-      try {        
+      try {
         const response = await updateDoorModel(updateId, opt);
         if (response?.data?.success) {
           showToast('Door Model option updated successfully', 'success');
@@ -46,26 +44,24 @@ const DoorModel = () => {
     }
   };
 
-const handleEdit = (id, editing) => {
-  const item = options.find(
-    (x) => x._id === id
-  );
-  if (editing) {
-    saveDimension(true, item, id);
-  }
-  setOptions(
-    options.map((item) =>
-      item._id === id
-        ? {
-            ...item,
-            editing: !item.editing
-          }
-        : item
-    )
-  );
-};
+  const handleEdit = (id, editing) => {
+    const item = options.find((x) => x._id === id);
+    if (editing) {
+      saveDimension(true, item, id);
+    }
+    setOptions(
+      options.map((item) =>
+        item._id === id
+          ? {
+              ...item,
+              editing: !item.editing
+            }
+          : item
+      )
+    );
+  };
 
-  const handleChange = (id, value, category) => { 
+  const handleChange = (id, value, category) => {
     setOptions((prev) =>
       prev.map((item) => {
         if (item._id !== id) return item;
@@ -80,13 +76,12 @@ const handleEdit = (id, editing) => {
           const updated = {
             ...item,
             status: value
-          };  
-          saveDimension(true, updated, id);        
-          return updated;      
+          };
+          saveDimension(true, updated, id);
+          return updated;
         }
       })
     );
-  
   };
 
   return (
@@ -142,49 +137,37 @@ const handleEdit = (id, editing) => {
                 flex: 1
               }}
             >
-
               <div
-  style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: '25px',
-    flex: 1
-  }}
->
-  <span
-    style={{
-      width: '150px',
-      fontWeight: '600'
-    }}
-  >
-    {item.subDesignId?.subDesignValue}
-  </span>
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '25px',
+                  flex: 1
+                }}
+              >
+                <span
+                  style={{
+                    width: '150px',
+                    fontWeight: '600'
+                  }}
+                >
+                  {item.subDesignId?.subDesignName}
+                </span>
 
-  {item.editing ? (
-    <input
-      type="text"
-      value={item.modelName}
-      onChange={(e) =>
-        handleChange(
-          item._id,
-          e.target.value,
-          'data'
-        )
-      }
-      style={{
-        padding: '6px 10px',
-        width: '200px'
-      }}
-    />
-  ) : (
-    <span>
-      {item.modelName}
-    </span>
-  )}
-</div>
-
-
-
+                {item.editing ? (
+                  <input
+                    type="text"
+                    value={item.modelName}
+                    onChange={(e) => handleChange(item._id, e.target.value, 'data')}
+                    style={{
+                      padding: '6px 10px',
+                      width: '200px'
+                    }}
+                  />
+                ) : (
+                  <span>{item.modelName}</span>
+                )}
+              </div>
             </div>
 
             <div>
