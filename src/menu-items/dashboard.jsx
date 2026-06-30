@@ -30,6 +30,38 @@ const dashboard = {
     icon: icons.DashboardOutlined,
     breadcrumbs: false
   },
+  {
+    id :'dimension',
+    title:'Dimension',
+    type:'item',
+    url:'/dimension',
+    icon: icons.DiffTwoTone,
+    breadcrumbs:false
+  },
+ {
+    id :'door-designs',
+    title:'Door Designs',
+    type:'item',
+    url:'/door-designs',
+    icon: icons.DashboardOutlined,
+    breadcrumbs:false
+  },
+  {
+    id :'sub-designs',
+    title:'Door Sub Designs',
+    type:'item',
+    url:'/sub-designs',
+    icon: icons.DashboardOutlined,
+    breadcrumbs:false
+  },
+  {
+    id :'door-models',
+    title:'Door Models',
+    type:'item',
+    url:'/door-models',
+    icon: icons.DiffTwoTone,
+    breadcrumbs:false
+  },
   
   {
     id :'door-frame',
@@ -90,38 +122,8 @@ const dashboard = {
   //   icon: icons.DashboardOutlined,
   //   breadcrumbs:false
   // },
- {
-    id :'door-designs',
-    title:'  Door Designs',
-    type:'item',
-    url:'/door-designs',
-    icon: icons.DashboardOutlined,
-    breadcrumbs:false
-  },
-  {
-    id :'sub-designs',
-    title:'Door Sub Designs',
-    type:'item',
-    url:'/sub-designs',
-    icon: icons.DashboardOutlined,
-    breadcrumbs:false
-  },
-  {
-    id :'dimension',
-    title:'Dimension',
-    type:'item',
-    url:'/dimension',
-    icon: icons.DiffTwoTone,
-    breadcrumbs:false
-  },
-  {
-    id :'door-models',
-    title:'Door Models',
-    type:'item',
-    url:'/door-models',
-    icon: icons.DiffTwoTone,
-    breadcrumbs:false
-  }
+
+
   ]
 };
 
