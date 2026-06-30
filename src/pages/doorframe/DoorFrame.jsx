@@ -23,18 +23,6 @@ const DoorFrame = () => {
       const response = await getDoorFrame();
       console.log('response data:', response);
       setDesigns(response.data.data);
-
-      // const selectedDesign = response.data.data.find(
-      //   d => d._id === response.data.data?.[0]?._id
-      // );
-
-      // setSubDesigns(selectedDesign.subdesign);
-
-      // const selectedSub = subDesigns.find(
-      //   s => s._id === response.data.data?.[0]?.subdesign?.[0]?._id
-      // );
-
-      // setFrames(selectedSub.frame);
     } catch (error) {
       console.error(error);
     }
@@ -56,24 +44,7 @@ const DoorFrame = () => {
     }
   };
 
-  // const handleEdit = (id,editing) => {
-  //   setDesigns((prev) =>
-  //     prev.map((design) => ({
-  //       ...design,
-  //       subdesign: design.subdesign.map((sub) => ({
-  //         ...sub,
-  //         frame: sub.frame.map((frame) => (frame._id === id ? { ...frame, editing: !frame.editing } : frame))
-  //       }))
-  //     }))
-  //   );
-
-  //   setFrames((prev) => prev.map((frame) => (frame._id === id ? { ...frame, editing: !frame.editing } : frame)));
-
-  //   if (editing) {
-  //     const result = frames?.find((item) => item._id === id);
-  //     saveFrame(result, id);
-  //   }
-  // };
+ 
 
   const handleEdit = (id, editing) => {
     setDesigns((prev) => {
@@ -208,26 +179,7 @@ const DoorFrame = () => {
           Frame Options
         </div>
 
-        {/* <select value={selectedDesign} onChange={handleDesignChange}>
-          <option value="">Select Design</option>
-
-          {designs.map((item) => (
-            <option key={item._id} value={item._id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-
-        <select value={selectedSubDesign} onChange={handleSubDesignChange}>
-          <option value="">Select Sub Design</option>
-
-          {subDesigns.map((item) => (
-            <option key={item._id} value={item._id}>
-              {item.name}
-            </option>
-          ))}
-        </select> */}
-
+       
         {frames.map((item) => (
           <div
             key={item._id}
