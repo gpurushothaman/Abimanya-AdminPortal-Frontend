@@ -92,7 +92,7 @@ const dashboard = {
   // },
  {
     id :'door-designs',
-    title:'Door Designs',
+    title:'  Door Designs',
     type:'item',
     url:'/door-designs',
     icon: icons.DashboardOutlined,

@@ -24,7 +24,7 @@ const DoorModel = () => {
   const getModels = async () => {
     try {
       const response = await getDoorModels();
-      console.log(response.data);
+      console.log(JSON.stringify(response.data.data, null, 2));
       if (response?.data?.success) {
         setOptions(response?.data?.data);
       }
@@ -46,7 +46,9 @@ const DoorModel = () => {
     ).values(),
   ];
 
-  const filteredOptions = options.filter((item) => item.subDesignId?.subDesignValue?.toLowerCase() === selectedSubDesign.toLowerCase());
+  const filteredOptions = options.filter((item) =>
+     item.subDesignId?.subDesignValue === selectedSubDesign
+);
 
   const saveDimension = async (flag, opt, updateId) => {
     if (flag) {

@@ -6,6 +6,7 @@ import { useToast } from '../../contexts/ToastContext';
 //api
 import { getDoorSubDesign, updateDoorSubDesign } from '../../services/doorSubDesignService';
 
+
 const SubDesign = () => {
   const { showToast } = useToast();
   const [options, setOptions] = useState([]);
@@ -222,11 +223,10 @@ const SubDesign = () => {
               >
                 {item.editing ? '✔️' : '✏️'}
               </button>
+              
 
               <FormControlLabel
-                control={
-                  <Switch checked={item?.status} onChange={(e) => handleChange(item._id, e.target.checked, 'status')} color="success" />
-                }
+                control={ <Switch checked={item?.status} onChange={(e) => handleChange(item._id, e.target.checked, 'status')} color="success" />}
                 label={item?.status ? 'Active' : 'Inactive'}
               />
             </div>
