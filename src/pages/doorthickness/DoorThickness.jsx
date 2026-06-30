@@ -1,275 +1,167 @@
 import React, { useEffect, useState } from 'react';
-import { getDoorThickness, createDoorThickness, updateDoorThickness, deleteDoorThickness } from '../../services/doorThicknessService';
+import { getAllDoorThickness, updateDoorThickness } from '../../services/doorThicknessService';
 import { useToast } from '../../contexts/ToastContext';
-import Switch from "@mui/material/Switch";
-import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from '@mui/material/Switch';
+import { FormControl, InputLabel, MenuItem, Select, Stack, FormControlLabel } from '@mui/material';
 
-const DoorThickNess = () => {
+const DoorThickness = () => {
   const { showToast } = useToast();
-  const [options, setOptions] = useState([]);
-  const [newThickness, setNewThickness] = useState('');
-  const [thicknessValue, setThicknessValue] = useState('');
-  const [error, setError] = useState('');
+
+  const [designs, setDesigns] = useState([]);
+  const [subDesigns, setSubDesigns] = useState([]);
+  const [thickness, setthickness] = useState([]);
+
+  const [selectedDesign, setSelectedDesign] = useState('');
+  const [selectedSubDesign, setSelectedSubDesign] = useState('');
 
   useEffect(() => {
     fetchDoorThickness();
   }, []);
+
   const fetchDoorThickness = async () => {
     try {
-      const response = await getDoorThickness();
-      setOptions(
-        response.data.data.map((item) => ({
-          ...item,
-          editing: false,
-          checked: false
-        }))
-      );
+      const response = await getAllDoorThickness();
+      console.log(response.data.data);
+      console.log('response data:', response);
+      setDesigns(response.data.data);
     } catch (error) {
-      console.error('Fetch Error:', error);
+      console.error(error);
     }
   };
 
-  const handleEdit = async (id) => {
-    const selected = options.find((item) => item._id === id);
-    if (selected.editing) {
-      const confirmed = window.confirm('Are you sure you want to update this item?');
-      if (!confirmed) return;
-
-      try {
-        const { data } = await updateDoorThickness(id, {
-          DoorThicknessname: selected.DoorThicknessname,
-          DoorThicknessvalue: Number(selected.DoorThicknessvalue),
-          status: selected.status
-        });
-        if (data.success) {
-          showToast('Door thickness updated successfully', 'success');
-        } else {
-          showToast('Door thickness update failed', 'error');
-          return;
-        }
-      } catch (error) {
-        console.error('Update Error:', error);
-        showToast('Something went wrong', 'error');
-        return;
-      }
-    }
-    setOptions(options.map((item) => (item._id === id ? { ...item, editing: !item.editing } : item)));
-  };
-
-
-
-  const handleNameChange = (id, value) => {
-    setOptions(options.map((item) =>
-      item._id === id
-        ? { ...item, DoorThicknessname: value }
-        : item
-    ));
-  };
-
-  const handleValueChange = (id, value) => {
-    if (/^\d*$/.test(value)) {
-      setOptions(
-        options.map((item) =>
-          item._id === id
-            ? { ...item, DoorThicknessvalue: value }
-            : item
-        )
-      );
-    }
-  };
-  const handleStatusChange = async (
-    id,
-    value
-  ) => {
-    setOptions((prev) =>
-      prev.map((item) => {
-        if (item._id !== id)
-          return item;
-
-        return {
-          ...item,
-          status: value
-        };
-      })
-    );
-
+  const saveThickness = async (data, updateId) => {
     try {
-      const current =
-        options.find(
-          (item) => item._id === id
-        );
-
-      const response =
-        await updateDoorThickness(
-          id,
-          {
-            ...current,
-            status: value
-          }
-        );
+      const response = await updateDoorThickness(updateId, data);
 
       if (response?.data?.success) {
-        showToast(
-          "Status updated successfully",
-          "success"
-        );
+        showToast('DoorThickness option updated successfully', 'success');
       } else {
-        showToast(
-          "Status update failed",
-          "error"
-        );
+        showToast('DoorThickness option not updated', 'error');
       }
     } catch (error) {
       console.error(error);
 
-      showToast(
-        "Something went wrong",
-        "error"
-      );
-    }
-  };
-
-  // UPDATE TOAST OPTIONS FOR   -----  >   ((((  DELETE MODEL  ))))
-
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm('Are you sure you want to delete this item?');
-    if (!confirmed) return;
-    try {
-      const { data } = await deleteDoorThickness(id);
-      if (data.success) {
-        setOptions(options.filter((item) => item._id !== id));
-        showToast('Door thickness deleted successfully', 'success');
-      } else {
-        showToast('Door thickness not deleted', 'error');
-      }
-    } catch (error) {
-      console.error('Delete Error:', error);
       showToast('Something went wrong', 'error');
     }
   };
 
-  const handleCheck = (id) => {
-    setOptions(options.map((item) => (item._id === id ? { ...item, checked: !item.checked } : item)));
-  };
+ 
 
-  // THIYAGUUUUUUUUU
-  const handleThicknessValueChange = (e) => {
-    console.log("sadf")
-    const value = e.target.value;
-    if (/^\d*$/.test(value)) {
-      setThicknessValue(value);
-      setError('');
-    } else {
-      setError('Enter correct value');
-    }
-  };
-
-  const handleSave = async () => {
-    if (!newThickness.trim()) {
-      alert('Enter Thickness');
-      return;
-    }
-    try {
-      const response = await createDoorThickness({
-        DoorThicknessname: newThickness,
-        DoorThicknessvalue: thicknessValue,
-      });
-      console.log(response.data.data);
-      setOptions([
-        ...options,
-        {
-          ...response.data.data,
-          editing: false,
-          checked: false
+  const handleEdit = (id, editing) => {
+    setDesigns((prev) => {
+      const updated = prev.map((design) => ({
+        ...design,
+        subdesign: design.subdesign.map((sub) => ({
+          ...sub,
+        thickness: sub.thickness.map((thickness) =>
+  thickness._id === id
+    ? { ...thickness, editing: !thickness.editing }
+    : thickness
+)
+        }))
+      }));
+      const currentDesign = updated.find((d) => d._id === selectedDesign);
+      const currentSub = currentDesign?.subdesign.find((s) => s._id === selectedSubDesign);
+      setSubDesigns(currentDesign?.subdesign || []);
+      setthickness(currentSub?.thickness || []);
+      if (editing) {
+        const result = currentSub?.thickness.find((f) => f._id === id);
+        if (result) {
+          saveThickness(result, id);
         }
-      ]);
-      setNewThickness('');
-      setThicknessValue('');
-      setError('');
-    } catch (error) {
-      console.error('Create Error:', error);
-    }
+      }
+      return updated;
+    });
+  };
+
+  const handleChange = (id, value, category) => {
+    setDesigns((prev) => {
+      const updated = prev.map((design) => ({
+        ...design,
+        subdesign: design.subdesign.map((sub) => ({
+          ...sub,
+        thickness: sub.thickness.map((thickness) =>
+            thickness._id === id
+              ? {
+                  ...thickness,
+                  ...(category === 'data' ? { DoorThicknessName: value } : { status: value })
+                }
+              : thickness
+          )
+        }))
+      }));
+      //Updated subdesign
+      const currentDesign = updated.find((d) => d._id === selectedDesign);
+      setSubDesigns(currentDesign?.subdesign || []);
+      //Updated orientation
+      const currentSub = currentDesign?.subdesign.find((s) => s._id === selectedSubDesign);
+      setthickness(currentSub?.thickness || []);
+      if (category === 'status') {
+        const result = currentSub?.thickness?.find((item) => item._id === id);
+        console.log('res:=', result);
+        saveThickness(result, id);
+      }
+      return updated;
+    });
+  };
+
+  const handleDesignChange = (e) => {
+    const designId = e.target.value;
+    setSelectedDesign(designId);
+    setSelectedSubDesign('');
+    const design = designs.find((d) => d._id === designId);
+    setSubDesigns(design ? design.subdesign : []);
+    setthickness([]);
+  };
+
+
+
+  const handleSubDesignChange = (e) => {
+    const subId = e.target.value;
+    setSelectedSubDesign(subId);
+    const sub = subDesigns.find((s) => s._id === subId);
+    setthickness(sub ? sub.thickness : []);
   };
 
   return (
     <div style={{ padding: '25px' }}>
-      <h2
-        style={{
-          marginBottom: '20px',
-          color: '#333',
-          fontWeight: '600'
-        }}
-      >
-        Door Thickness
-      </h2>
+      <h2 style={{ marginBottom: '20px', color: '#333', fontWeight: '600' }}>Door Thickness</h2>
+
+      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+        <FormControl fullWidth size="small">
+          <InputLabel id="design-label">Design</InputLabel>
+          <Select labelId="design-label" value={selectedDesign} label="Design" onChange={handleDesignChange}>
+            <MenuItem value="">
+              <em>Select Design</em>
+            </MenuItem>
+
+            {designs.map((item) => (
+              <MenuItem key={item._id} value={item._id}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth size="small" disabled={!selectedDesign}>
+          <InputLabel id="subdesign-label">Sub Design</InputLabel>
+          <Select labelId="subdesign-label" value={selectedSubDesign} label="Sub Design" onChange={handleSubDesignChange}>
+            <MenuItem value="">
+              <em>Select Sub Design</em>
+            </MenuItem>
+
+            {subDesigns.map((item) => (
+              <MenuItem key={item._id} value={item._id}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Stack>
 
       <div
         style={{
-          marginBottom: '20px',
-          display: 'flex',
-          gap: '10px'
-        }}
-      >
-        {/* FIRST CHECKBOX */}
-
-        <input
-          type="text"
-          placeholder="Enter Thickness name"
-          value={newThickness}
-          onChange={(e) => setNewThickness(e.target.value)}
-          style={{
-            padding: '10px',
-            width: '250px',
-            border: '1px solid #ccc',
-            borderRadius: '6px'
-          }}
-        />
-
-        {/* SECOND CHECKBOX */}
-        <input
-          type="number"
-          placeholder="Enter Thickness Value"
-          value={thicknessValue}
-          onChange={handleThicknessValueChange}
-          style={{
-            padding: '10px',
-            width: '250px',
-            border: '1px solid #ccc',
-            borderRadius: '6px'
-          }}
-        />
-
-        {/* ERROR MESSAGE */}
-        {error && (
-          <p
-            style={{
-              color: 'red',
-              fontSize: '12px',
-              marginTop: '5px'
-            }}
-          >
-            {error}
-          </p>
-        )}
-
-        <button
-          onClick={handleSave}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#1976d2',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer'
-          }}
-        >
-          Add
-        </button>
-      </div>
-
-      <div
-        style={{
-          width: '700px',
+          width: '550px',
           background: '#fff',
           border: '1px solid #dcdcdc',
           borderRadius: '8px',
@@ -277,19 +169,12 @@ const DoorThickNess = () => {
           boxShadow: '0 2px 6px rgba(0,0,0,0.08)'
         }}
       >
-        <div
-          style={{
-            padding: '14px 18px',
-            background: '#f5f5f5',
-            borderBottom: '1px solid #ddd',
-            fontWeight: '600',
-            fontSize: '16px'
-          }}
-        >
+        <div style={{ padding: '14px 18px', background: '#f5f5f5', borderBottom: '1px solid #ddd', fontWeight: '600', fontSize: '16px' }}>
           Thickness Options
         </div>
 
-        {options.map((item) => (
+       
+        {thickness.map((item) => (
           <div
             key={item._id}
             style={{
@@ -300,138 +185,43 @@ const DoorThickNess = () => {
               borderBottom: '1px solid #eee'
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '15px',
-                flex: 1
-              }}
-            >
-              {/* <input
-                type="checkbox"
-                checked={item.checked}
-                onChange={() =>
-                  handleCheck(item._id)
-                }
-              /> */}
-
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flex: 1 }}>
               {item.editing ? (
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "10px"
-                  }}
-                >
-                  <input
-                    value={item.DoorThicknessname}
-                    onChange={(e) =>
-                      handleNameChange(item._id, e.target.value)
-                    }
-                    style={{
-                      padding: "6px"
-                    }}
-                  />
-
-                  <input
-                    value={item.DoorThicknessvalue}
-                    onChange={(e) =>
-                      handleValueChange(item._id, e.target.value)
-                    }
-                    style={{
-                      padding: "6px"
-                    }}
-                  />
-                </div>
+                <input
+                  type="text"
+                value={item.DoorThicknessName}
+                  onChange={(e) => handleChange(item._id, e.target.value, 'data')}
+                  style={{ padding: '6px 10px', width: '200px' }}
+                />
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    flex: 1,
-                    gap: "80px"
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "15px",
-                      minWidth: "150px"
-                    }}
-                  >
-                    {item.DoorThicknessname}
-                  </span>
-
-                  <span
-                    style={{
-                      fontSize: "15px",
-                      minWidth: "80px"
-                    }}
-                  >
-                    {item.DoorThicknessvalue}
-                  </span>
-                </div>
+                <span style={{ fontSize: '15px' }}>    {item.DoorThicknessName}  </span>
               )}
-
             </div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: "flex-end",
-                gap: "12px",
-                minWidth: "320px"
-              }}
-            >
+
+            <div>
               <button
-                onClick={() => handleEdit(item._id)}
+                onClick={() => handleEdit(item._id, item.editing)}
                 style={{
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  fontSize: '18px'
+                  fontSize: '18px',
+                  marginRight: '15px'
                 }}
               >
                 {item.editing ? '✔️' : '✏️'}
               </button>
 
-
-
               <FormControlLabel
                 control={
                   <Switch
-                    checked={
-                      item?.status || false
-                    }
-                    onChange={(e) =>
-                      handleStatusChange(
-                        item._id,
-                        e.target.checked
-                      )
-                    }
+                    checked={item?.status || false}
+                    onChange={(e) => handleChange(item._id, e.target.checked, 'status')}
                     color="success"
                   />
                 }
-                label={
-                  item?.status
-                    ? "Active"
-                    : "Inactive"
-                }
+                label={item?.status ? 'Active' : 'Inactive'}
               />
-
-
-
-
-              <button
-                onClick={() => handleDelete(item._id)}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  fontSize: '18px'
-                }}
-              >
-                🗑️
-              </button>
             </div>
           </div>
         ))}
@@ -440,4 +230,4 @@ const DoorThickNess = () => {
   );
 };
 
-export default DoorThickNess;
+export default DoorThickness;

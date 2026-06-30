@@ -84,7 +84,7 @@ const DoorOrientation = () => {
             orientation._id === id
               ? {
                   ...orientation,
-                  ...(category === 'data' ? { DoorOrientationname: value } : { status: value })
+                  ...(category === 'data' ? { DoorOrientationName: value } : { status: value })
                 }
               : orientation
           )
@@ -189,12 +189,12 @@ const DoorOrientation = () => {
               {item.editing ? (
                 <input
                   type="text"
-                value={item.DoorOrientationname}
+                value={item.DoorOrientationName}
                   onChange={(e) => handleChange(item._id, e.target.value, 'data')}
                   style={{ padding: '6px 10px', width: '200px' }}
                 />
               ) : (
-                <span style={{ fontSize: '15px' }}>    {item.DoorOrientationname}  </span>
+                <span style={{ fontSize: '15px' }}>    {item.DoorOrientationName}  </span>
               )}
             </div>
 

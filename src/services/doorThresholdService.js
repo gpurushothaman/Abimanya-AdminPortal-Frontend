@@ -1,7 +1,7 @@
 import api from '../api/axios';
 import { ENDPOINTS } from '../api/endpoints';
 
-export const getDoorThreshold = () =>
+export const getAllDoorThreshold = () =>
      api.get(ENDPOINTS.DOOR_THRESHOLD);
 
 export const updateDoorThreshold = (id, data) =>
