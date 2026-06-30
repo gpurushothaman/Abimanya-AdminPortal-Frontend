@@ -93,7 +93,7 @@ const DoorOrientation = () => {
       //Updated subdesign
       const currentDesign = updated.find((d) => d._id === selectedDesign);
       setSubDesigns(currentDesign?.subdesign || []);
-      //Updated frames
+      //Updated orientation
       const currentSub = currentDesign?.subdesign.find((s) => s._id === selectedSubDesign);
       setOrientation(currentSub?.orientation || []);
       if (category === 'status') {
