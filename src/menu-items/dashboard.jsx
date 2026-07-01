@@ -70,6 +70,25 @@ const dashboard = {
     icon: icons.DashboardOutlined,
     breadcrumbs:false
   },
+
+  {
+    id :'door-frame-types',
+    title:'Door Frame Types',
+    type:'item',
+    url:'/door-frame-types',
+    icon: icons.DashboardOutlined,
+    breadcrumbs:false
+  },
+
+  {
+    id :'door-frame-type-options',
+    title:'Door Frame Type Options',
+    type:'item',
+    url:'/door-frame-type-options',
+    icon: icons.DashboardOutlined,
+    breadcrumbs:false
+  },
+  
   
   {
     id :'door-thickness',

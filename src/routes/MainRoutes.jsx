@@ -16,6 +16,8 @@ import Dimension from '../pages/dimension/Dimension';
 import DoorDesign from '../pages/doordesign/DoorDesign';
 import SubDesign from '../pages/doorsubdesign/SubDesign';
 import DoorModel from '../pages/doormodel/DoorModel';
+import DoorFrameType from '../pages/doorFrameType/DoorFrameType';
+import DoorFrameTypeOptions from '../pages/doorFrameTypeoptions/DoorFrameTypeOptions';
 
 // render- Dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -47,6 +49,15 @@ const MainRoutes = {
     path:'door-frame',
     element:<DoorFrame/>
    },
+   {
+    path:'door-frame-types',
+    element:<DoorFrameType/>
+   },
+   {
+    path:'door-frame-type-options',
+    element:<DoorFrameTypeOptions/>
+   },
+   
    {
     path:'door-thickness',
     element:<DoorThickNess/>
