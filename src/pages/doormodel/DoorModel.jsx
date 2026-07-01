@@ -126,7 +126,8 @@ const DoorModel = () => {
             padding: '8px 12px',
             width: '220px',
             borderRadius: '5px',
-            border: '1px solid #ccc'
+            border: '1px solid #ccc',
+            borderColor:"green"
           }}
         >
           {subDesignOptions.map((subDesign) => (

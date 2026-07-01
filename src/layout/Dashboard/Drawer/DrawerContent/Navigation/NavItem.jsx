@@ -70,14 +70,21 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
             py: !drawerOpen && level === 1 ? 1.25 : 1,
             ...(drawerOpen && {
               '&:hover': { bgcolor: 'primary.lighter' },
+
+
               '&.Mui-selected': {
-                bgcolor: 'primary.lighter',
+                bgcolor:  '#E8F5E9',
                 borderRight: '2px solid',
-                borderColor: 'primary.main',
-                color: iconSelectedColor,
-                '&:hover': { color: iconSelectedColor, bgcolor: 'primary.lighter' }
+                borderColor: '#66BB6A',
+                color: '#2E7D32',
+                '&:hover': { color: '#2E7D32', bgcolor: '#E8F5E9' }
               }
-            }),
+            }
+          
+          
+          
+          
+          ),
             ...(!drawerOpen && {
               '&:hover': { bgcolor: 'transparent' },
               '&.Mui-selected': { '&:hover': { bgcolor: 'transparent' }, bgcolor: 'transparent' }
@@ -89,7 +96,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
             <ListItemIcon
               sx={(theme) => ({
                 minWidth: 28,
-                color: isSelected ? iconSelectedColor : textColor,
+                color: isSelected ? '#2E7D32' : textColor,
                 ...(!drawerOpen && {
                   borderRadius: 1.5,
                   width: 36,
@@ -111,7 +118,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
           {(drawerOpen || (!drawerOpen && level !== 1)) && (
             <ListItemText
               primary={
-                <Typography variant="h6" sx={{ color: isSelected ? iconSelectedColor : textColor }}>
+                <Typography variant="h6" sx={{ color: isSelected ? '#2E7D32' : textColor }}>
                   {item.title}
                 </Typography>
               }
@@ -159,7 +166,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
                   ml: 1,
                   color: 'secondary.dark',
                   borderColor: isSelected ? 'primary.light' : 'secondary.light',
-                  '&:hover': { borderColor: isSelected ? 'primary.main' : 'secondary.main' }
+                  '&:hover': { borderColor: isSelected ? '#2E7D32' : 'secondary.main' }
                 }}
               >
                 <ActionIcon style={{ fontSize: '0.625rem' }} />

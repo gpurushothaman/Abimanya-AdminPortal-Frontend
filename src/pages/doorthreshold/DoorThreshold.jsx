@@ -127,7 +127,28 @@ const JampLocation = () => {
       <h2 style={{ marginBottom: '20px', color: '#333', fontWeight: '600' }}>Door Threshold</h2>
 
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-        <FormControl fullWidth size="small">
+        <FormControl fullWidth size="small"    sx={{
+    "& .MuiInputLabel-root": {
+      color: "#66BB6A", // Normal label color
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#66BB6A", // Focus label color
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "#A5D6A7", // Normal border
+      },
+      "&:hover fieldset": {
+        borderColor: "#66BB6A", // Hover border
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#66BB6A", // Focus border
+      },
+    },
+    "& .MuiSvgIcon-root": {
+      color: "#66BB6A", // Dropdown arrow
+    },
+  }}  >
           <InputLabel id="design-label">Design</InputLabel>
           <Select labelId="design-label" value={selectedDesign} label="Design" onChange={handleDesignChange}>
             <MenuItem value="">
@@ -142,7 +163,28 @@ const JampLocation = () => {
           </Select>
         </FormControl>
 
-        <FormControl fullWidth size="small" disabled={!selectedDesign}>
+        <FormControl fullWidth size="small" disabled={!selectedDesign}      sx={{
+    "& .MuiInputLabel-root": {
+      color: "#66BB6A", // Normal label color
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#66BB6A", // Focus label color
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "#A5D6A7", // Normal border
+      },
+      "&:hover fieldset": {
+        borderColor: "#66BB6A", // Hover border
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#66BB6A", // Focus border
+      },
+    },
+    "& .MuiSvgIcon-root": {
+      color: "#66BB6A", // Dropdown arrow
+    },
+  }}  >
           <InputLabel id="subdesign-label">Sub Design</InputLabel>
           <Select labelId="subdesign-label" value={selectedSubDesign} label="Sub Design" onChange={handleSubDesignChange}>
             <MenuItem value="">

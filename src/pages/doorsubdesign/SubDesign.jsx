@@ -125,7 +125,8 @@ const SubDesign = () => {
             padding: '8px 12px',
             width: '200px',
             borderRadius: '5px',
-            border: '1px solid #ccc'
+            border: '1px solid #ccc',
+            borderColor:"green"
           }}
         >
           {designOptions.map((design) => (
