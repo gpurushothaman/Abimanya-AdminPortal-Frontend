@@ -1,42 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import { getDoorJambLocation, updateDoorJambLocation } from '../../services/doorJambLocationService';
+import { getAllDoorJambLocation, updateDoorJambLocation } from '../../services/doorJambLocationService';
 import { useToast } from '../../contexts/ToastContext';
 import Switch from '@mui/material/Switch';
 import { FormControl, InputLabel, MenuItem, Select, Stack, FormControlLabel } from '@mui/material';
 
-const JampLocation = () => {
+const DoorJambLocation = () => {
   const { showToast } = useToast();
 
   const [designs, setDesigns] = useState([]);
+
   const [subDesigns, setSubDesigns] = useState([]);
-  const [jamblocation, setJamblocation] = useState([]);
+  const [frames, setFrames] = useState([]);
+  const [frameTypes, setFrameTypes] = useState([]);
+  const [frameTypeOptions, setFrameTypeOptions] = useState([]);
+  const [jamblocations, setJamblocations] = useState([]);
 
   const [selectedDesign, setSelectedDesign] = useState('');
   const [selectedSubDesign, setSelectedSubDesign] = useState('');
+  const [selectedFrame, setSelectedFrame] = useState('');
+  const [selectedFrameType, setSelectedFrameType] = useState('');
+  const [selectedFrameTypeOption, setSelectedFrameTypeOption] = useState('');
 
   useEffect(() => {
-    fetchDoorJambLocation();
+    fetchDoorJambLocations();
   }, []);
 
-  const fetchDoorJambLocation = async () => {
+  const fetchDoorJambLocations = async () => {
     try {
-      const response = await getDoorJambLocation();
-      console.log(response.data.data);
-      console.log('response data:', response);
+      const response = await getAllDoorJambLocation();
       setDesigns(response.data.data);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const saveJamblocation = async (data, updateId) => {
+  const saveJambLocation = async (data, updateId) => {
     try {
       const response = await updateDoorJambLocation(updateId, data);
 
       if (response?.data?.success) {
-        showToast('JambLocation option updated successfully', 'success');
+        showToast('Door JambLocation updated successfully', 'success');
       } else {
-        showToast('JambLocation option not updated', 'error');
+        showToast('Door JambLocation not updated', 'error');
       }
     } catch (error) {
       console.error(error);
@@ -45,31 +50,56 @@ const JampLocation = () => {
     }
   };
 
- 
-
   const handleEdit = (id, editing) => {
     setDesigns((prev) => {
       const updated = prev.map((design) => ({
         ...design,
         subdesign: design.subdesign.map((sub) => ({
           ...sub,
-        jamblocation: sub.jamblocation.map((jamblocation) =>
-  jamblocation._id === id
-    ? { ...jamblocation, editing: !jamblocation.editing }
-    : jamblocation
-)
+          frame: sub.frame.map((frame) => ({
+            ...frame,
+            frameTypes: frame.frameTypes.map((type) => ({
+              ...type,
+              options: type.options.map((option) => ({
+                ...option,
+                jamblocations: option.jamblocations.map((jamblocation) =>
+                  jamblocation._id === id
+                    ? {
+                        ...jamblocation,
+                        editing: !jamblocation.editing
+                      }
+                    : jamblocation
+                )
+              }))
+            }))
+          }))
         }))
       }));
+
       const currentDesign = updated.find((d) => d._id === selectedDesign);
+
       const currentSub = currentDesign?.subdesign.find((s) => s._id === selectedSubDesign);
+
+      const currentFrame = currentSub?.frame.find((f) => f._id === selectedFrame);
+
+      const currentFrameType = currentFrame?.frameTypes.find((t) => t._id === selectedFrameType);
+
+      const currentOption = currentFrameType?.options.find((o) => o._id === selectedFrameTypeOption);
+
       setSubDesigns(currentDesign?.subdesign || []);
-      setJamblocation(currentSub?.jamblocation || []);
+      setFrames(currentSub?.frame || []);
+      setFrameTypes(currentFrame?.frameTypes || []);
+      setFrameTypeOptions(currentFrameType?.options || []);
+      setJamblocations(currentOption?.jamblocations || []);
+
       if (editing) {
-        const result = currentSub?.jamblocation.find((f) => f._id === id);
+        const result = currentOption?.jamblocations.find((o) => o._id === id);
+
         if (result) {
-          saveJamblocation(result, id);
+          saveJambLocation(result, id);
         }
       }
+
       return updated;
     });
   };
@@ -80,78 +110,130 @@ const JampLocation = () => {
         ...design,
         subdesign: design.subdesign.map((sub) => ({
           ...sub,
-        jamblocation: sub.jamblocation.map((jamblocation) =>
-            jamblocation._id === id
-              ? {
-                  ...jamblocation,
-                  ...(category === 'data' ? { jambLocationName: value } : { status: value })
-                }
-              : jamblocation
-          )
+          frame: sub.frame.map((frame) => ({
+            ...frame,
+            frameTypes: frame.frameTypes.map((type) => ({
+              ...type,
+              options: type.options.map((option) => ({
+                ...option,
+                jamblocations: option.jamblocations.map((jamblocation) =>
+                  jamblocation._id === id
+                    ? {
+                        ...jamblocation,
+                        ...(category === 'data' ? { jambLocationName: value } : { status: value })
+                      }
+                    : jamblocation
+                )
+              }))
+            }))
+          }))
         }))
       }));
-      //Updated subdesign
+
       const currentDesign = updated.find((d) => d._id === selectedDesign);
-      setSubDesigns(currentDesign?.subdesign || []);
-      //Updated orientation
+
       const currentSub = currentDesign?.subdesign.find((s) => s._id === selectedSubDesign);
-      setJamblocation(currentSub?.jamblocation || []);
+
+      const currentFrame = currentSub?.frame.find((f) => f._id === selectedFrame);
+
+      const currentFrameType = currentFrame?.frameTypes.find((t) => t._id === selectedFrameType);
+
+      const currentOption = currentFrameType?.options.find((o) => o._id === selectedFrameTypeOption);
+
+      setSubDesigns(currentDesign?.subdesign || []);
+      setFrames(currentSub?.frame || []);
+      setFrameTypes(currentFrame?.frameTypes || []);
+      setFrameTypeOptions(currentFrameType?.options || []);
+      setJamblocations(currentOption?.jamblocations || []);
+
       if (category === 'status') {
-        const result = currentSub?.jamblocation?.find((item) => item._id === id);
-        console.log('res:=', result);
-        saveJamblocation(result, id);
+        const result = currentOption?.jamblocations.find((jamblocation) => jamblocation._id === id);
+
+        if (result) {
+          saveJambLocation(result, id);
+        }
       }
+
       return updated;
     });
   };
 
   const handleDesignChange = (e) => {
-    const designId = e.target.value;
-    setSelectedDesign(designId);
+    const id = e.target.value;
+
+    setSelectedDesign(id);
     setSelectedSubDesign('');
-    const design = designs.find((d) => d._id === designId);
-    setSubDesigns(design ? design.subdesign : []);
-    setJamblocation([]);
+    setSelectedFrame('');
+    setSelectedFrameType('');
+    setSelectedFrameTypeOption('');
+
+    const design = designs.find((d) => d._id === id);
+
+    setSubDesigns(design?.subdesign || []);
+    setFrames([]);
+    setFrameTypes([]);
+    setFrameTypeOptions([]);
+    setJamblocations([]);
   };
-
-
 
   const handleSubDesignChange = (e) => {
-    const subId = e.target.value;
-    setSelectedSubDesign(subId);
-    const sub = subDesigns.find((s) => s._id === subId);
-    setJamblocation(sub ? sub.jamblocation : []);
+    const id = e.target.value;
+
+    setSelectedSubDesign(id);
+    setSelectedFrame('');
+    setSelectedFrameType('');
+    setSelectedFrameTypeOption('');
+
+    const sub = subDesigns.find((s) => s._id === id);
+
+    setFrames(sub?.frame || []);
+    setFrameTypes([]);
+    setFrameTypeOptions([]);
+    setJamblocations([]);
   };
 
+  const handleFrameChange = (e) => {
+    const id = e.target.value;
+
+    setSelectedFrame(id);
+    setSelectedFrameType('');
+    setSelectedFrameTypeOption('');
+
+    const frame = frames.find((f) => f._id === id);
+
+    setFrameTypes(frame?.frameTypes || []);
+    setFrameTypeOptions([]);
+    setJamblocations([]);
+  };
+
+  const handleFrameTypeChange = (e) => {
+    const id = e.target.value;
+    setSelectedFrameType(id);
+    setSelectedFrameTypeOption('');
+
+    const frameType = frameTypes.find((f) => f._id === id);
+    setFrameTypeOptions(frameType?.options || []);
+    setJamblocations([]);
+  };
+
+  const handleFrameTypeOptionChange = (e) => {
+    const id = e.target.value;
+
+    setSelectedFrameTypeOption(id);
+
+    const option = frameTypeOptions.find((o) => o._id === id);
+
+    setJamblocations(option?.jamblocations || []);
+  };
   return (
     <div style={{ padding: '25px' }}>
-      <h2 style={{ marginBottom: '20px', color: '#333', fontWeight: '600' }}>Door Jamb Location</h2>
+      <h2 style={{ marginBottom: '20px', color: '#333', fontWeight: '600' }}>Door JambLocation</h2>
 
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-        <FormControl fullWidth size="small"    sx={{
-    "& .MuiInputLabel-root": {
-      color: "#66BB6A", // Normal label color
-    },
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: "#66BB6A", // Focus label color
-    },
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        borderColor: "#A5D6A7", // Normal border
-      },
-      "&:hover fieldset": {
-        borderColor: "#66BB6A", // Hover border
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#66BB6A", // Focus border
-      },
-    },
-    "& .MuiSvgIcon-root": {
-      color: "#66BB6A", // Dropdown arrow
-    },
-  }}   >
-          <InputLabel id="design-label">Design</InputLabel>
-          <Select labelId="design-label" value={selectedDesign} label="Design" onChange={handleDesignChange}>
+        <FormControl fullWidth size="small">
+          <InputLabel>Design</InputLabel>
+
+          <Select value={selectedDesign} label="Design" onChange={handleDesignChange}>
             <MenuItem value="">
               <em>Select Design</em>
             </MenuItem>
@@ -164,30 +246,10 @@ const JampLocation = () => {
           </Select>
         </FormControl>
 
-        <FormControl fullWidth size="small" disabled={!selectedDesign}     sx={{
-    "& .MuiInputLabel-root": {
-      color: "#66BB6A", // Normal label color
-    },
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: "#66BB6A", // Focus label color
-    },
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        borderColor: "#A5D6A7", // Normal border
-      },
-      "&:hover fieldset": {
-        borderColor: "#66BB6A", // Hover border
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#66BB6A", // Focus border
-      },
-    },
-    "& .MuiSvgIcon-root": {
-      color: "#66BB6A", // Dropdown arrow
-    },
-  }}   >
-          <InputLabel id="subdesign-label">Sub Design</InputLabel>
-          <Select labelId="subdesign-label" value={selectedSubDesign} label="Sub Design" onChange={handleSubDesignChange}>
+        <FormControl fullWidth size="small" disabled={!selectedDesign}>
+          <InputLabel>Sub Design</InputLabel>
+
+          <Select value={selectedSubDesign} label="Sub Design" onChange={handleSubDesignChange}>
             <MenuItem value="">
               <em>Select Sub Design</em>
             </MenuItem>
@@ -195,6 +257,54 @@ const JampLocation = () => {
             {subDesigns.map((item) => (
               <MenuItem key={item._id} value={item._id}>
                 {item.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth size="small" disabled={!selectedSubDesign}>
+          <InputLabel>Frame</InputLabel>
+
+          <Select value={selectedFrame} label="Frame" onChange={handleFrameChange}>
+            <MenuItem value="">
+              <em>Select Frame</em>
+            </MenuItem>
+
+            {frames.map((item) => (
+              <MenuItem key={item._id} value={item._id}>
+                {item.frameName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth size="small" disabled={!selectedFrame}>
+          <InputLabel>Frame Type</InputLabel>
+
+          <Select value={selectedFrameType} label="Frame Type" onChange={handleFrameTypeChange}>
+            <MenuItem value="">
+              <em>Select Frame Type</em>
+            </MenuItem>
+
+            {frameTypes.map((item) => (
+              <MenuItem key={item._id} value={item._id}>
+                {item.frameTypeName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth size="small" disabled={!selectedFrameType}>
+          <InputLabel>Frame Type Option</InputLabel>
+
+          <Select value={selectedFrameTypeOption} label="Frame Type Option" onChange={handleFrameTypeOptionChange}>
+            <MenuItem value="">
+              <em>Select Frame Type Option</em>
+            </MenuItem>
+
+            {frameTypeOptions.map((item) => (
+              <MenuItem key={item._id} value={item._id}>
+                {item.frameTypeOptionName}
               </MenuItem>
             ))}
           </Select>
@@ -212,11 +322,10 @@ const JampLocation = () => {
         }}
       >
         <div style={{ padding: '14px 18px', background: '#f5f5f5', borderBottom: '1px solid #ddd', fontWeight: '600', fontSize: '16px' }}>
-          Orientation Options
+          JambLocation Settings
         </div>
 
-       
-        {jamblocation.map((item) => (
+        {jamblocations.map((item) => (
           <div
             key={item._id}
             style={{
@@ -231,12 +340,12 @@ const JampLocation = () => {
               {item.editing ? (
                 <input
                   type="text"
-                value={item.jambLocationName}
+                  value={item.jambLocationName}
                   onChange={(e) => handleChange(item._id, e.target.value, 'data')}
                   style={{ padding: '6px 10px', width: '200px' }}
                 />
               ) : (
-                <span style={{ fontSize: '15px' }}>    {item.jambLocationName}  </span>
+                <span style={{ fontSize: '15px' }}>{item.jambLocationName}</span>
               )}
             </div>
 
@@ -272,4 +381,4 @@ const JampLocation = () => {
   );
 };
 
-export default JampLocation;
+export default DoorJambLocation;
