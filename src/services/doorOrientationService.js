@@ -1,7 +1,7 @@
 import api from "../api/axios";
 import { ENDPOINTS } from "../api/endpoints";
 
-export const getDoorOrientation = () =>
+export const getDoorOrientations = () =>
   api.get(ENDPOINTS.DOOR_ORIENTATION);
 
 export const updateDoorOrientation = (id, data) =>

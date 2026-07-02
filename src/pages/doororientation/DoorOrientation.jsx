@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getDoorOrientation, updateDoorOrientation } from '../../services/doorOrientationService';
+import { getDoorOrientations, updateDoorOrientation } from '../../services/doorOrientationService';
 import { useToast } from '../../contexts/ToastContext';
 import Switch from '@mui/material/Switch';
 import { FormControl, InputLabel, MenuItem, Select, Stack, FormControlLabel } from '@mui/material';
@@ -8,21 +8,26 @@ const DoorOrientation = () => {
   const { showToast } = useToast();
 
   const [designs, setDesigns] = useState([]);
+
   const [subDesigns, setSubDesigns] = useState([]);
-  const [orientation, setOrientation] = useState([]);
+  const [frames, setFrames] = useState([]);
+  const [frameTypes, setFrameTypes] = useState([]);
+  const [frameTypeOptions, setFrameTypeOptions] = useState([]);
+  const [orientations, setOrientations] = useState([]);
 
   const [selectedDesign, setSelectedDesign] = useState('');
   const [selectedSubDesign, setSelectedSubDesign] = useState('');
+  const [selectedFrame, setSelectedFrame] = useState('');
+  const [selectedFrameType, setSelectedFrameType] = useState('');
+  const [selectedFrameTypeOption, setSelectedFrameTypeOption] = useState('');
 
   useEffect(() => {
-    fetchDoorOrientation();
+    fetchDoorOrientations();
   }, []);
 
-  const fetchDoorOrientation = async () => {
+  const fetchDoorOrientations = async () => {
     try {
-      const response = await getDoorOrientation();
-      console.log(response.data.data);
-      console.log('response data:', response);
+      const response = await getDoorOrientations();
       setDesigns(response.data.data);
     } catch (error) {
       console.error(error);
@@ -34,9 +39,9 @@ const DoorOrientation = () => {
       const response = await updateDoorOrientation(updateId, data);
 
       if (response?.data?.success) {
-        showToast('Orientation option updated successfully', 'success');
+        showToast('Door orientation updated successfully', 'success');
       } else {
-        showToast('Orientation option not updated', 'error');
+        showToast('Door orientation not updated', 'error');
       }
     } catch (error) {
       console.error(error);
@@ -45,31 +50,56 @@ const DoorOrientation = () => {
     }
   };
 
- 
-
   const handleEdit = (id, editing) => {
     setDesigns((prev) => {
       const updated = prev.map((design) => ({
         ...design,
         subdesign: design.subdesign.map((sub) => ({
           ...sub,
-        orientation: sub.orientation.map((orientation) =>
-  orientation._id === id
-    ? { ...orientation, editing: !orientation.editing }
-    : orientation
-)
+          frame: sub.frame.map((frame) => ({
+            ...frame,
+            frameTypes: frame.frameTypes.map((type) => ({
+              ...type,
+              options: type.options.map((option) => ({
+                ...option,
+                orientations: option.orientations.map((orientation) =>
+                  orientation._id === id
+                    ? {
+                        ...orientation,
+                        editing: !orientation.editing
+                      }
+                    : orientation
+                )
+              }))
+            }))
+          }))
         }))
       }));
+
       const currentDesign = updated.find((d) => d._id === selectedDesign);
+
       const currentSub = currentDesign?.subdesign.find((s) => s._id === selectedSubDesign);
+
+      const currentFrame = currentSub?.frame.find((f) => f._id === selectedFrame);
+
+      const currentFrameType = currentFrame?.frameTypes.find((t) => t._id === selectedFrameType);
+
+      const currentOption = currentFrameType?.options.find((o) => o._id === selectedFrameTypeOption);
+
       setSubDesigns(currentDesign?.subdesign || []);
-      setOrientation(currentSub?.orientation || []);
+      setFrames(currentSub?.frame || []);
+      setFrameTypes(currentFrame?.frameTypes || []);
+      setFrameTypeOptions(currentFrameType?.options || []);
+      setOrientations(currentOption?.orientations || []);
+
       if (editing) {
-        const result = currentSub?.orientation.find((f) => f._id === id);
+        const result = currentOption?.orientations.find((o) => o._id === id);
+
         if (result) {
           saveOrientation(result, id);
         }
       }
+
       return updated;
     });
   };
@@ -80,78 +110,130 @@ const DoorOrientation = () => {
         ...design,
         subdesign: design.subdesign.map((sub) => ({
           ...sub,
-        orientation: sub.orientation.map((orientation) =>
-            orientation._id === id
-              ? {
-                  ...orientation,
-                  ...(category === 'data' ? { DoorOrientationName: value } : { status: value })
-                }
-              : orientation
-          )
+          frame: sub.frame.map((frame) => ({
+            ...frame,
+            frameTypes: frame.frameTypes.map((type) => ({
+              ...type,
+              options: type.options.map((option) => ({
+                ...option,
+                orientations: option.orientations.map((orientation) =>
+                  orientation._id === id
+                    ? {
+                        ...orientation,
+                        ...(category === 'data' ? { doorOrientationName: value } : { status: value })
+                      }
+                    : orientation
+                )
+              }))
+            }))
+          }))
         }))
       }));
-      //Updated subdesign
+
       const currentDesign = updated.find((d) => d._id === selectedDesign);
-      setSubDesigns(currentDesign?.subdesign || []);
-      //Updated orientation
+
       const currentSub = currentDesign?.subdesign.find((s) => s._id === selectedSubDesign);
-      setOrientation(currentSub?.orientation || []);
+
+      const currentFrame = currentSub?.frame.find((f) => f._id === selectedFrame);
+
+      const currentFrameType = currentFrame?.frameTypes.find((t) => t._id === selectedFrameType);
+
+      const currentOption = currentFrameType?.options.find((o) => o._id === selectedFrameTypeOption);
+
+      setSubDesigns(currentDesign?.subdesign || []);
+      setFrames(currentSub?.frame || []);
+      setFrameTypes(currentFrame?.frameTypes || []);
+      setFrameTypeOptions(currentFrameType?.options || []);
+      setOrientations(currentOption?.orientations || []);
+
       if (category === 'status') {
-        const result = currentSub?.orientation?.find((item) => item._id === id);
-        console.log('res:=', result);
-        saveOrientation(result, id);
+        const result = currentOption?.orientations.find((orientation) => orientation._id === id);
+
+        if (result) {
+          saveOrientation(result, id);
+        }
       }
+
       return updated;
     });
   };
 
   const handleDesignChange = (e) => {
-    const designId = e.target.value;
-    setSelectedDesign(designId);
+    const id = e.target.value;
+
+    setSelectedDesign(id);
     setSelectedSubDesign('');
-    const design = designs.find((d) => d._id === designId);
-    setSubDesigns(design ? design.subdesign : []);
-    setOrientation([]);
+    setSelectedFrame('');
+    setSelectedFrameType('');
+    setSelectedFrameTypeOption('');
+
+    const design = designs.find((d) => d._id === id);
+
+    setSubDesigns(design?.subdesign || []);
+    setFrames([]);
+    setFrameTypes([]);
+    setFrameTypeOptions([]);
+    setOrientations([]);
   };
-
-
 
   const handleSubDesignChange = (e) => {
-    const subId = e.target.value;
-    setSelectedSubDesign(subId);
-    const sub = subDesigns.find((s) => s._id === subId);
-    setOrientation(sub ? sub.orientation : []);
+    const id = e.target.value;
+
+    setSelectedSubDesign(id);
+    setSelectedFrame('');
+    setSelectedFrameType('');
+    setSelectedFrameTypeOption('');
+
+    const sub = subDesigns.find((s) => s._id === id);
+
+    setFrames(sub?.frame || []);
+    setFrameTypes([]);
+    setFrameTypeOptions([]);
+    setOrientations([]);
   };
 
+  const handleFrameChange = (e) => {
+    const id = e.target.value;
+
+    setSelectedFrame(id);
+    setSelectedFrameType('');
+    setSelectedFrameTypeOption('');
+
+    const frame = frames.find((f) => f._id === id);
+
+    setFrameTypes(frame?.frameTypes || []);
+    setFrameTypeOptions([]);
+    setOrientations([]);
+  };
+
+  const handleFrameTypeChange = (e) => {
+    const id = e.target.value;
+    setSelectedFrameType(id);
+    setSelectedFrameTypeOption('');
+
+    const frameType = frameTypes.find((f) => f._id === id);
+    setFrameTypeOptions(frameType?.options || []);
+    setOrientations([]);
+  };
+
+  const handleFrameTypeOptionChange = (e) => {
+    const id = e.target.value;
+
+    setSelectedFrameTypeOption(id);
+
+    const option = frameTypeOptions.find((o) => o._id === id);
+
+    setOrientations(option?.orientations || []);
+  };
   return (
     <div style={{ padding: '25px' }}>
       <h2 style={{ marginBottom: '20px', color: '#333', fontWeight: '600' }}>Door Orientation</h2>
 
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-        <FormControl fullWidth size="small"    sx={{
-    "& .MuiInputLabel-root": {
-      color: "#66BB6A", // Normal label color
-    },
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: "#66BB6A", // Focus label color
-    },
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        borderColor: "#A5D6A7", // Normal border
-      },
-      "&:hover fieldset": {
-        borderColor: "#66BB6A", // Hover border
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#66BB6A", // Focus border
-      },
-    },
-    "& .MuiSvgIcon-root": {
-      color: "#66BB6A", // Dropdown arrow
-    },
-  }}  >
-          <InputLabel id="design-label">Design</InputLabel>
-          <Select labelId="design-label" value={selectedDesign} label="Design" onChange={handleDesignChange}>
+        <FormControl fullWidth size="small">
+          <InputLabel>Design</InputLabel>
+
+          <Select value={selectedDesign} label="Design" onChange={handleDesignChange}>
             <MenuItem value="">
               <em>Select Design</em>
             </MenuItem>
@@ -164,30 +246,10 @@ const DoorOrientation = () => {
           </Select>
         </FormControl>
 
-        <FormControl fullWidth size="small" disabled={!selectedDesign}     sx={{
-    "& .MuiInputLabel-root": {
-      color: "#66BB6A", // Normal label color
-    },
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: "#66BB6A", // Focus label color
-    },
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        borderColor: "#A5D6A7", // Normal border
-      },
-      "&:hover fieldset": {
-        borderColor: "#66BB6A", // Hover border
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#66BB6A", // Focus border
-      },
-    },
-    "& .MuiSvgIcon-root": {
-      color: "#66BB6A", // Dropdown arrow
-    },
-  }}  >
-          <InputLabel id="subdesign-label">Sub Design</InputLabel>
-          <Select labelId="subdesign-label" value={selectedSubDesign} label="Sub Design" onChange={handleSubDesignChange}>
+        <FormControl fullWidth size="small" disabled={!selectedDesign}>
+          <InputLabel>Sub Design</InputLabel>
+
+          <Select value={selectedSubDesign} label="Sub Design" onChange={handleSubDesignChange}>
             <MenuItem value="">
               <em>Select Sub Design</em>
             </MenuItem>
@@ -195,6 +257,54 @@ const DoorOrientation = () => {
             {subDesigns.map((item) => (
               <MenuItem key={item._id} value={item._id}>
                 {item.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth size="small" disabled={!selectedSubDesign}>
+          <InputLabel>Frame</InputLabel>
+
+          <Select value={selectedFrame} label="Frame" onChange={handleFrameChange}>
+            <MenuItem value="">
+              <em>Select Frame</em>
+            </MenuItem>
+
+            {frames.map((item) => (
+              <MenuItem key={item._id} value={item._id}>
+                {item.frameName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth size="small" disabled={!selectedFrame}>
+          <InputLabel>Frame Type</InputLabel>
+
+          <Select value={selectedFrameType} label="Frame Type" onChange={handleFrameTypeChange}>
+            <MenuItem value="">
+              <em>Select Frame Type</em>
+            </MenuItem>
+
+            {frameTypes.map((item) => (
+              <MenuItem key={item._id} value={item._id}>
+                {item.frameTypeName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth size="small" disabled={!selectedFrameType}>
+          <InputLabel>Frame Type Option</InputLabel>
+
+          <Select value={selectedFrameTypeOption} label="Frame Type Option" onChange={handleFrameTypeOptionChange}>
+            <MenuItem value="">
+              <em>Select Frame Type Option</em>
+            </MenuItem>
+
+            {frameTypeOptions.map((item) => (
+              <MenuItem key={item._id} value={item._id}>
+                {item.frameTypeOptionName}
               </MenuItem>
             ))}
           </Select>
@@ -212,11 +322,10 @@ const DoorOrientation = () => {
         }}
       >
         <div style={{ padding: '14px 18px', background: '#f5f5f5', borderBottom: '1px solid #ddd', fontWeight: '600', fontSize: '16px' }}>
-          Orientation Options
+          Orientation Settings
         </div>
 
-       
-        {orientation.map((item) => (
+        {orientations.map((item) => (
           <div
             key={item._id}
             style={{
@@ -231,12 +340,12 @@ const DoorOrientation = () => {
               {item.editing ? (
                 <input
                   type="text"
-                value={item.DoorOrientationName}
+                  value={item.doorOrientationName}
                   onChange={(e) => handleChange(item._id, e.target.value, 'data')}
                   style={{ padding: '6px 10px', width: '200px' }}
                 />
               ) : (
-                <span style={{ fontSize: '15px' }}>    {item.DoorOrientationName}  </span>
+                <span style={{ fontSize: '15px' }}>{item.doorOrientationName}</span>
               )}
             </div>
 
