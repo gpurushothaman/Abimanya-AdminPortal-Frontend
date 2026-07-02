@@ -8,11 +8,18 @@ const DoorThickness = () => {
   const { showToast } = useToast();
 
   const [designs, setDesigns] = useState([]);
+
   const [subDesigns, setSubDesigns] = useState([]);
-  const [thickness, setthickness] = useState([]);
+  const [frames, setFrames] = useState([]);
+  const [frameTypes, setFrameTypes] = useState([]);
+  const [frameTypeOptions, setFrameTypeOptions] = useState([]);
+  const [thickness, setThickness] = useState([]);
 
   const [selectedDesign, setSelectedDesign] = useState('');
   const [selectedSubDesign, setSelectedSubDesign] = useState('');
+  const [selectedFrame, setSelectedFrame] = useState('');
+  const [selectedFrameType, setSelectedFrameType] = useState('');
+  const [selectedFrameTypeOption, setSelectedFrameTypeOption] = useState('');
 
   useEffect(() => {
     fetchDoorThickness();
@@ -21,8 +28,6 @@ const DoorThickness = () => {
   const fetchDoorThickness = async () => {
     try {
       const response = await getAllDoorThickness();
-      console.log(response.data.data);
-      console.log('response data:', response);
       setDesigns(response.data.data);
     } catch (error) {
       console.error(error);
@@ -34,9 +39,9 @@ const DoorThickness = () => {
       const response = await updateDoorThickness(updateId, data);
 
       if (response?.data?.success) {
-        showToast('DoorThickness option updated successfully', 'success');
+        showToast('Door Thickness updated successfully', 'success');
       } else {
-        showToast('DoorThickness option not updated', 'error');
+        showToast('Door Thickness not updated', 'error');
       }
     } catch (error) {
       console.error(error);
@@ -45,31 +50,56 @@ const DoorThickness = () => {
     }
   };
 
- 
-
   const handleEdit = (id, editing) => {
     setDesigns((prev) => {
       const updated = prev.map((design) => ({
         ...design,
         subdesign: design.subdesign.map((sub) => ({
           ...sub,
-        thickness: sub.thickness.map((thickness) =>
-  thickness._id === id
-    ? { ...thickness, editing: !thickness.editing }
-    : thickness
-)
+          frame: sub.frame.map((frame) => ({
+            ...frame,
+            frameTypes: frame.frameTypes.map((type) => ({
+              ...type,
+              options: type.options.map((option) => ({
+                ...option,
+                Thicknesss: option.Thicknesss.map((Thickness) =>
+                  Thickness._id === id
+                    ? {
+                        ...Thickness,
+                        editing: !Thickness.editing
+                      }
+                    : Thickness
+                )
+              }))
+            }))
+          }))
         }))
       }));
+
       const currentDesign = updated.find((d) => d._id === selectedDesign);
+
       const currentSub = currentDesign?.subdesign.find((s) => s._id === selectedSubDesign);
+
+      const currentFrame = currentSub?.frame.find((f) => f._id === selectedFrame);
+
+      const currentFrameType = currentFrame?.frameTypes.find((t) => t._id === selectedFrameType);
+
+      const currentOption = currentFrameType?.options.find((o) => o._id === selectedFrameTypeOption);
+
       setSubDesigns(currentDesign?.subdesign || []);
-      setthickness(currentSub?.thickness || []);
+      setFrames(currentSub?.frame || []);
+      setFrameTypes(currentFrame?.frameTypes || []);
+      setFrameTypeOptions(currentFrameType?.options || []);
+      setThickness(currentOption?.Thicknesss || []);
+
       if (editing) {
-        const result = currentSub?.thickness.find((f) => f._id === id);
+        const result = currentOption?.Thicknesss.find((o) => o._id === id);
+
         if (result) {
           saveThickness(result, id);
         }
       }
+
       return updated;
     });
   };
@@ -80,78 +110,130 @@ const DoorThickness = () => {
         ...design,
         subdesign: design.subdesign.map((sub) => ({
           ...sub,
-        thickness: sub.thickness.map((thickness) =>
-            thickness._id === id
-              ? {
-                  ...thickness,
-                  ...(category === 'data' ? { DoorThicknessName: value } : { status: value })
-                }
-              : thickness
-          )
+          frame: sub.frame.map((frame) => ({
+            ...frame,
+            frameTypes: frame.frameTypes.map((type) => ({
+              ...type,
+              options: type.options.map((option) => ({
+                ...option,
+                Thicknesss: option.Thicknesss.map((Thickness) =>
+                  Thickness._id === id
+                    ? {
+                        ...Thickness,
+                        ...(category === 'data' ? { DoorThicknessName: value } : { status: value })
+                      }
+                    : Thickness
+                )
+              }))
+            }))
+          }))
         }))
       }));
-      //Updated subdesign
+
       const currentDesign = updated.find((d) => d._id === selectedDesign);
-      setSubDesigns(currentDesign?.subdesign || []);
-      //Updated orientation
+
       const currentSub = currentDesign?.subdesign.find((s) => s._id === selectedSubDesign);
-      setthickness(currentSub?.thickness || []);
+
+      const currentFrame = currentSub?.frame.find((f) => f._id === selectedFrame);
+
+      const currentFrameType = currentFrame?.frameTypes.find((t) => t._id === selectedFrameType);
+
+      const currentOption = currentFrameType?.options.find((o) => o._id === selectedFrameTypeOption);
+
+      setSubDesigns(currentDesign?.subdesign || []);
+      setFrames(currentSub?.frame || []);
+      setFrameTypes(currentFrame?.frameTypes || []);
+      setFrameTypeOptions(currentFrameType?.options || []);
+      setThickness(currentOption?.Thicknesss || []);
+
       if (category === 'status') {
-        const result = currentSub?.thickness?.find((item) => item._id === id);
-        console.log('res:=', result);
-        saveThickness(result, id);
+        const result = currentOption?.Thicknesss.find((Thickness) => Thickness._id === id);
+
+        if (result) {
+          saveThickness(result, id);
+        }
       }
+
       return updated;
     });
   };
 
   const handleDesignChange = (e) => {
-    const designId = e.target.value;
-    setSelectedDesign(designId);
+    const id = e.target.value;
+
+    setSelectedDesign(id);
     setSelectedSubDesign('');
-    const design = designs.find((d) => d._id === designId);
-    setSubDesigns(design ? design.subdesign : []);
-    setthickness([]);
+    setSelectedFrame('');
+    setSelectedFrameType('');
+    setSelectedFrameTypeOption('');
+
+    const design = designs.find((d) => d._id === id);
+
+    setSubDesigns(design?.subdesign || []);
+    setFrames([]);
+    setFrameTypes([]);
+    setFrameTypeOptions([]);
+    setThickness([]);
   };
-
-
 
   const handleSubDesignChange = (e) => {
-    const subId = e.target.value;
-    setSelectedSubDesign(subId);
-    const sub = subDesigns.find((s) => s._id === subId);
-    setthickness(sub ? sub.thickness : []);
+    const id = e.target.value;
+
+    setSelectedSubDesign(id);
+    setSelectedFrame('');
+    setSelectedFrameType('');
+    setSelectedFrameTypeOption('');
+
+    const sub = subDesigns.find((s) => s._id === id);
+
+    setFrames(sub?.frame || []);
+    setFrameTypes([]);
+    setFrameTypeOptions([]);
+    setThickness([]);
   };
 
+  const handleFrameChange = (e) => {
+    const id = e.target.value;
+
+    setSelectedFrame(id);
+    setSelectedFrameType('');
+    setSelectedFrameTypeOption('');
+
+    const frame = frames.find((f) => f._id === id);
+
+    setFrameTypes(frame?.frameTypes || []);
+    setFrameTypeOptions([]);
+    setThickness([]);
+  };
+
+  const handleFrameTypeChange = (e) => {
+    const id = e.target.value;
+    setSelectedFrameType(id);
+    setSelectedFrameTypeOption('');
+
+    const frameType = frameTypes.find((f) => f._id === id);
+    setFrameTypeOptions(frameType?.options || []);
+    setThickness([]);
+  };
+
+  const handleFrameTypeOptionChange = (e) => {
+    const id = e.target.value;
+
+    setSelectedFrameTypeOption(id);
+
+    const option = frameTypeOptions.find((o) => o._id === id);
+
+    setThickness(option?.Thicknesss || []);
+  };
   return (
     <div style={{ padding: '25px' }}>
       <h2 style={{ marginBottom: '20px', color: '#333', fontWeight: '600' }}>Door Thickness</h2>
 
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-        <FormControl fullWidth size="small"     sx={{
-    "& .MuiInputLabel-root": {
-      color: "#66BB6A", // Normal label color
-    },
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: "#66BB6A", // Focus label color
-    },
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        borderColor: "#A5D6A7", // Normal border
-      },
-      "&:hover fieldset": {
-        borderColor: "#66BB6A", // Hover border
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#66BB6A", // Focus border
-      },
-    },
-    "& .MuiSvgIcon-root": {
-      color: "#66BB6A", // Dropdown arrow
-    },
-  }}    >
-          <InputLabel id="design-label">Design</InputLabel>
-          <Select labelId="design-label" value={selectedDesign} label="Design" onChange={handleDesignChange}>
+        <FormControl fullWidth size="small">
+          <InputLabel>Design</InputLabel>
+
+          <Select value={selectedDesign} label="Design" onChange={handleDesignChange}>
             <MenuItem value="">
               <em>Select Design</em>
             </MenuItem>
@@ -164,30 +246,10 @@ const DoorThickness = () => {
           </Select>
         </FormControl>
 
-        <FormControl fullWidth size="small" disabled={!selectedDesign}      sx={{
-    "& .MuiInputLabel-root": {
-      color: "#66BB6A", // Normal label color
-    },
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: "#66BB6A", // Focus label color
-    },
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        borderColor: "#A5D6A7", // Normal border
-      },
-      "&:hover fieldset": {
-        borderColor: "#66BB6A", // Hover border
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#66BB6A", // Focus border
-      },
-    },
-    "& .MuiSvgIcon-root": {
-      color: "#66BB6A", // Dropdown arrow
-    },
-  }}    >
-          <InputLabel id="subdesign-label">Sub Design</InputLabel>
-          <Select labelId="subdesign-label" value={selectedSubDesign} label="Sub Design" onChange={handleSubDesignChange}>
+        <FormControl fullWidth size="small" disabled={!selectedDesign}>
+          <InputLabel>Sub Design</InputLabel>
+
+          <Select value={selectedSubDesign} label="Sub Design" onChange={handleSubDesignChange}>
             <MenuItem value="">
               <em>Select Sub Design</em>
             </MenuItem>
@@ -195,6 +257,54 @@ const DoorThickness = () => {
             {subDesigns.map((item) => (
               <MenuItem key={item._id} value={item._id}>
                 {item.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth size="small" disabled={!selectedSubDesign}>
+          <InputLabel>Frame</InputLabel>
+
+          <Select value={selectedFrame} label="Frame" onChange={handleFrameChange}>
+            <MenuItem value="">
+              <em>Select Frame</em>
+            </MenuItem>
+
+            {frames.map((item) => (
+              <MenuItem key={item._id} value={item._id}>
+                {item.frameName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth size="small" disabled={!selectedFrame}>
+          <InputLabel>Frame Type</InputLabel>
+
+          <Select value={selectedFrameType} label="Frame Type" onChange={handleFrameTypeChange}>
+            <MenuItem value="">
+              <em>Select Frame Type</em>
+            </MenuItem>
+
+            {frameTypes.map((item) => (
+              <MenuItem key={item._id} value={item._id}>
+                {item.frameTypeName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth size="small" disabled={!selectedFrameType}>
+          <InputLabel>Frame Type Option</InputLabel>
+
+          <Select value={selectedFrameTypeOption} label="Frame Type Option" onChange={handleFrameTypeOptionChange}>
+            <MenuItem value="">
+              <em>Select Frame Type Option</em>
+            </MenuItem>
+
+            {frameTypeOptions.map((item) => (
+              <MenuItem key={item._id} value={item._id}>
+                {item.frameTypeOptionName}
               </MenuItem>
             ))}
           </Select>
@@ -212,10 +322,9 @@ const DoorThickness = () => {
         }}
       >
         <div style={{ padding: '14px 18px', background: '#f5f5f5', borderBottom: '1px solid #ddd', fontWeight: '600', fontSize: '16px' }}>
-          Thickness Options
+          Thickness Settings
         </div>
 
-       
         {thickness.map((item) => (
           <div
             key={item._id}
@@ -231,12 +340,12 @@ const DoorThickness = () => {
               {item.editing ? (
                 <input
                   type="text"
-                value={item.DoorThicknessName}
+                  value={item.DoorThicknessName}
                   onChange={(e) => handleChange(item._id, e.target.value, 'data')}
                   style={{ padding: '6px 10px', width: '200px' }}
                 />
               ) : (
-                <span style={{ fontSize: '15px' }}>    {item.DoorThicknessName}  </span>
+                <span style={{ fontSize: '15px' }}>{item.DoorThicknessName}</span>
               )}
             </div>
 
