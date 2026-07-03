@@ -217,7 +217,7 @@ const DoorFrame = () => {
           boxShadow: '0 2px 6px rgba(0,0,0,0.08)'
         }}
       >
-        <div style={{ padding: '14px 18px', background: '#f5f5f5', borderBottom: '1px solid #ddd', fontWeight: '600', fontSize: '16px' }}>
+        <div style={{ padding: '14px 18px', background: '#ccfb96', borderBottom: '1px solid #ddd', fontWeight: '600', fontSize: '16px' }}>
           Frame Options
         </div>
 

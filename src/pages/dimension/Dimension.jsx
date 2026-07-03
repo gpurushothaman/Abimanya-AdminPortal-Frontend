@@ -100,7 +100,7 @@ const Dimension = () => {
         <div
           style={{
             padding: '14px 18px',
-            background: '#f5f5f5',
+            background: '#ccfb96',
             borderBottom: '1px solid #ddd',
             fontWeight: '600',
             fontSize: '16px',

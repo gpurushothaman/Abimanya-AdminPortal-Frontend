@@ -206,7 +206,7 @@ export default function DoorLocation() {
         <thead>
           <tr
             style={{
-              background: '#f0f2f5'
+              background: '#ccfb96'
             }}
           >
             <th style={thStyle}>S.No</th>

@@ -230,7 +230,28 @@ const DoorThickness = () => {
       <h2 style={{ marginBottom: '20px', color: '#333', fontWeight: '600' }}>Door Thickness</h2>
 
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-        <FormControl fullWidth size="small">
+        <FormControl fullWidth size="small"        sx={{
+    "& .MuiInputLabel-root": {
+      color: "#66BB6A", // Normal label color
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#66BB6A", // Focus label color
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "#A5D6A7", // Normal border
+      },
+      "&:hover fieldset": {
+        borderColor: "#66BB6A", // Hover border
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#66BB6A", // Focus border
+      },
+    },
+    "& .MuiSvgIcon-root": {
+      color: "#66BB6A", // Dropdown arrow
+    },
+  }} >
           <InputLabel>Design</InputLabel>
 
           <Select value={selectedDesign} label="Design" onChange={handleDesignChange}>
@@ -246,7 +267,28 @@ const DoorThickness = () => {
           </Select>
         </FormControl>
 
-        <FormControl fullWidth size="small" disabled={!selectedDesign}>
+        <FormControl fullWidth size="small" disabled={!selectedDesign}    sx={{
+    "& .MuiInputLabel-root": {
+      color: "#66BB6A", // Normal label color
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#66BB6A", // Focus label color
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "#A5D6A7", // Normal border
+      },
+      "&:hover fieldset": {
+        borderColor: "#66BB6A", // Hover border
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#66BB6A", // Focus border
+      },
+    },
+    "& .MuiSvgIcon-root": {
+      color: "#66BB6A", // Dropdown arrow
+    },
+  }}  >
           <InputLabel>Sub Design</InputLabel>
 
           <Select value={selectedSubDesign} label="Sub Design" onChange={handleSubDesignChange}>
@@ -262,7 +304,28 @@ const DoorThickness = () => {
           </Select>
         </FormControl>
 
-        <FormControl fullWidth size="small" disabled={!selectedSubDesign}>
+        <FormControl fullWidth size="small" disabled={!selectedSubDesign}     sx={{
+    "& .MuiInputLabel-root": {
+      color: "#66BB6A", // Normal label color
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#66BB6A", // Focus label color
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "#A5D6A7", // Normal border
+      },
+      "&:hover fieldset": {
+        borderColor: "#66BB6A", // Hover border
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#66BB6A", // Focus border
+      },
+    },
+    "& .MuiSvgIcon-root": {
+      color: "#66BB6A", // Dropdown arrow
+    },
+  }}  >
           <InputLabel>Frame</InputLabel>
 
           <Select value={selectedFrame} label="Frame" onChange={handleFrameChange}>
@@ -278,7 +341,28 @@ const DoorThickness = () => {
           </Select>
         </FormControl>
 
-        <FormControl fullWidth size="small" disabled={!selectedFrame}>
+        <FormControl fullWidth size="small" disabled={!selectedFrame}       sx={{
+    "& .MuiInputLabel-root": {
+      color: "#66BB6A", // Normal label color
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#66BB6A", // Focus label color
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "#A5D6A7", // Normal border
+      },
+      "&:hover fieldset": {
+        borderColor: "#66BB6A", // Hover border
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#66BB6A", // Focus border
+      },
+    },
+    "& .MuiSvgIcon-root": {
+      color: "#66BB6A", // Dropdown arrow
+    },
+  }}  >
           <InputLabel>Frame Type</InputLabel>
 
           <Select value={selectedFrameType} label="Frame Type" onChange={handleFrameTypeChange}>
@@ -294,7 +378,28 @@ const DoorThickness = () => {
           </Select>
         </FormControl>
 
-        <FormControl fullWidth size="small" disabled={!selectedFrameType}>
+        <FormControl fullWidth size="small" disabled={!selectedFrameType}       sx={{
+    "& .MuiInputLabel-root": {
+      color: "#66BB6A", // Normal label color
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#66BB6A", // Focus label color
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "#A5D6A7", // Normal border
+      },
+      "&:hover fieldset": {
+        borderColor: "#66BB6A", // Hover border
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#66BB6A", // Focus border
+      },
+    },
+    "& .MuiSvgIcon-root": {
+      color: "#66BB6A", // Dropdown arrow
+    },
+  }}  >
           <InputLabel>Frame Type Option</InputLabel>
 
           <Select value={selectedFrameTypeOption} label="Frame Type Option" onChange={handleFrameTypeOptionChange}>
@@ -321,7 +426,7 @@ const DoorThickness = () => {
           boxShadow: '0 2px 6px rgba(0,0,0,0.08)'
         }}
       >
-        <div style={{ padding: '14px 18px', background: '#f5f5f5', borderBottom: '1px solid #ddd', fontWeight: '600', fontSize: '16px' }}>
+        <div style={{ padding: '14px 18px', background: '#ccfb96', borderBottom: '1px solid #ddd', fontWeight: '600', fontSize: '16px' }}>
           Thickness Settings
         </div>
 
