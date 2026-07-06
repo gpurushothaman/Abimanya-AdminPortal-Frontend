@@ -12,10 +12,13 @@ import {
   DialogActions,
   Grid,
   TextField,
-  MenuItem
+  MenuItem,
+  Box
 } from '@mui/material';
 import ViewInArIcon from '@mui/icons-material/ViewInAr';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import IconButton from '@mui/material/IconButton';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 //Toast
 import { useToast } from '../../contexts/ToastContext';
@@ -23,17 +26,22 @@ import { useToast } from '../../contexts/ToastContext';
 import { getDoorModels, updateDoorModel } from '../../services/doorModelService';
 
 const DoorModel = () => {
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL;
   const { showToast } = useToast();
   const [options, setOptions] = useState([]);
   const [selectedSubDesign, setSelectedSubDesign] = useState('');
 
   const [open, setOpen] = useState(false);
   const [modelData, setModelData] = useState(null);
+  const [previewTexture, setPreviewTexture] = useState(false);
 
   const [form, setForm] = useState({
     modelFile: null,
     mainTexture: null,
-    seamlessTexture: ''
+    seamlessTexture: '',
+    modelFileName: null,
+    mainTextureFileName: null,
+    mainTextureFilePath: null
   });
 
   const seamlessTextures = [
@@ -55,9 +63,9 @@ const DoorModel = () => {
   const getModels = async () => {
     try {
       const response = await getDoorModels();
-      console.log(JSON.stringify(response.data.data, null, 2));
-      if (response?.data?.success) {
-        setOptions(response?.data?.data);
+      const responseData = response?.data;
+      if (responseData?.success) {
+        setOptions(responseData?.data);
       }
     } catch (error) {
       console.error(error);
@@ -95,7 +103,7 @@ const DoorModel = () => {
   };
 
   const uploadModel = async () => {
-    if (modelData) {
+    if (modelData && (form?.modelFile || form?.mainTexture) && ( form?.modelFileName && form?.mainTextureFileName)) {
       try {
         const formData = new FormData();
         formData.append('modelFile', form?.modelFile);
@@ -106,6 +114,28 @@ const DoorModel = () => {
 
         const response = await updateDoorModel(modelData?._id, formData);
         if (response?.data?.success) {
+          console.log('data:=', response);
+
+          setOptions((prev) =>
+            prev.map((item) =>
+              item._id === response.data.data._id
+                ? {
+                    ...item,
+                    modelPath: response.data.data.modelPath,
+                    modelFileName: response.data.data.modelFileName,
+                    modelMainTextureFileName: response.data.data.modelMainTextureFileName,
+                    modelMainTexturePath: response.data.data.modelMainTexturePath
+                  }
+                : item
+            )
+          );
+
+          setForm({
+            ...form,
+            modelFileName: response.data.data?.modelFileName,
+            mainTextureFileName: response.data.data?.modelMainTextureFileName,
+            mainTextureFilePath: response.data.data?.modelMainTexturePath
+          });
           showToast('Door Model option updated successfully', 'success');
         } else {
           showToast('Door Model option not updated', 'error');
@@ -114,6 +144,8 @@ const DoorModel = () => {
         console.error(error);
         showToast('Something went wrong', 'error');
       }
+    }else{
+      showToast('Please upload the file', 'error');
     }
   };
 
@@ -162,8 +194,31 @@ const DoorModel = () => {
     console.log(filtered);
     setModelData(filtered);
     setOpen(status);
+    setForm({
+      ...form,
+      modelFileName: filtered?.modelFileName,
+      mainTextureFileName: filtered?.modelMainTextureFileName,
+      mainTextureFilePath: filtered?.modelMainTexturePath
+    });
   };
 
+  const uploadMainTexturefn = (e) => {
+    setForm({
+      ...form,
+      mainTexture: e.target.files[0],
+      mainTextureFileName: e.target.files[0]?.name
+    });
+    e.target.value = '';
+  };
+
+  const uploadModelfn = (e) => {
+    setForm({
+      ...form,
+      modelFile: e.target.files[0],
+      modelFileName: e.target.files[0]?.name
+    });
+    e.target.value = '';
+  };
   return (
     <div style={{ padding: '25px' }}>
       <h2
@@ -315,42 +370,26 @@ const DoorModel = () => {
             <Grid item xs={12}>
               <Button variant="outlined" component="label" fullWidth>
                 Upload Model (.glb, .fbx, .obj)
-                <input
-                  type="file"
-                  hidden
-                  accept=".glb"
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      modelFile: e.target.files[0]
-                    })
-                  }
-                />
+                <input type="file" hidden accept=".glb" onChange={(e) => uploadModelfn(e)} />
               </Button>
 
-              {form.modelFile && <p>{form.modelFile.name}</p>}
+              {<p>{form?.modelFileName || ''}</p>}
             </Grid>
 
-            <img src={`http://localhost:5000/src/assets/doors/textures/elite/LE_1/1783154572017.jpeg"`}/>
+            {/* <img src={`${SERVER_URL}/assets/doors/textures/elite/LE_1/1783154572017.jpeg`}/> */}
 
             {/* Main Texture */}
             <Grid item xs={12}>
               <Button variant="outlined" component="label" fullWidth>
                 Upload Main Texture
-                <input
-                  type="file"
-                  hidden
-                  accept="image/*"
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      mainTexture: e.target.files[0]
-                    })
-                  }
-                />
+                <input type="file" hidden accept="image/*" onChange={(e) => uploadMainTexturefn(e)} />
               </Button>
 
-              {form.mainTexture && <p>{form.mainTexture.name}</p>}
+              {<p>{form?.mainTextureFileName || ''}</p>}
+
+              <IconButton onClick={() => setPreviewTexture(!previewTexture)}>
+                <VisibilityIcon />
+              </IconButton>
             </Grid>
 
             {/* Seamless Texture Dropdown */}
@@ -375,6 +414,27 @@ const DoorModel = () => {
               </TextField>
             </Grid>
           </Grid>
+          {previewTexture && (
+            <Box
+              sx={{
+                width: 120,
+                height: 120,
+                borderRadius: '50%',
+                overflow: 'hidden',
+                border: '2px solid #ddd'
+              }}
+            >
+              <img
+                src={`${SERVER_URL}/${form?.mainTextureFilePath}`}
+                alt="Texture"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+            </Box>
+          )}
         </DialogContent>
 
         <DialogActions>
