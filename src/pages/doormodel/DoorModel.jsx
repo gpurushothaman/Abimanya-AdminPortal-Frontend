@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
+
+import {
+  Checkbox,
+  Switch,
+  FormControlLabel,
+  Button,
+  Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  TextField,
+  MenuItem
+} from '@mui/material';
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+
 //Toast
 import { useToast } from '../../contexts/ToastContext';
 //api
@@ -10,6 +26,21 @@ const DoorModel = () => {
   const { showToast } = useToast();
   const [options, setOptions] = useState([]);
   const [selectedSubDesign, setSelectedSubDesign] = useState('');
+
+  const [open, setOpen] = useState(false);
+  const [modelData, setModelData] = useState(null);
+
+  const [form, setForm] = useState({
+    modelFile: null,
+    mainTexture: null,
+    seamlessTexture: ''
+  });
+
+  const seamlessTextures = [
+    { id: 'oak', name: 'Oak' },
+    { id: 'walnut', name: 'Walnut' },
+    { id: 'teak', name: 'Teak' }
+  ];
 
   useEffect(() => {
     getModels();
@@ -33,24 +64,21 @@ const DoorModel = () => {
     }
   };
 
-
   const subDesignOptions = [
     ...new Map(
       options.map((item) => [
         item.subDesignId?.subDesignValue,
         {
           label: item.subDesignId?.subDesignName,
-          value: item.subDesignId?.subDesignValue,
-        },
+          value: item.subDesignId?.subDesignValue
+        }
       ])
-    ).values(),
+    ).values()
   ];
 
-  const filteredOptions = options.filter((item) =>
-     item.subDesignId?.subDesignValue === selectedSubDesign
-);
+  const filteredOptions = options.filter((item) => item.subDesignId?.subDesignValue === selectedSubDesign);
 
-  const saveDimension = async (flag, opt, updateId) => {
+  const saveModel = async (flag, opt, updateId) => {
     if (flag) {
       try {
         const response = await updateDoorModel(updateId, opt);
@@ -66,10 +94,33 @@ const DoorModel = () => {
     }
   };
 
+  const uploadModel = async () => {
+    if (modelData) {
+      try {
+        const formData = new FormData();
+        formData.append('modelFile', form?.modelFile);
+        formData.append('mainTexture', form?.mainTexture);
+        formData.append('subDesignValue', modelData?.subDesignId?.subDesignValue);
+        formData.append('modelValue', modelData?.modelValue);
+        formData.append('seamlessTexture', '');
+
+        const response = await updateDoorModel(modelData?._id, formData);
+        if (response?.data?.success) {
+          showToast('Door Model option updated successfully', 'success');
+        } else {
+          showToast('Door Model option not updated', 'error');
+        }
+      } catch (error) {
+        console.error(error);
+        showToast('Something went wrong', 'error');
+      }
+    }
+  };
+
   const handleEdit = (id, editing) => {
     const item = options.find((x) => x._id === id);
     if (editing) {
-      saveDimension(true, item, id);
+      saveModel(true, item, id);
     }
     setOptions(
       options.map((item) =>
@@ -99,11 +150,18 @@ const DoorModel = () => {
             ...item,
             status: value
           };
-          saveDimension(true, updated, id);
+          saveModel(true, updated, id);
           return updated;
         }
       })
     );
+  };
+
+  const openUploadDialog = (status, updateId) => {
+    const filtered = options.filter((item) => item._id === updateId)?.[0];
+    console.log(filtered);
+    setModelData(filtered);
+    setOpen(status);
   };
 
   return (
@@ -127,7 +185,7 @@ const DoorModel = () => {
             width: '220px',
             borderRadius: '5px',
             border: '1px solid #ccc',
-            borderColor:"green"
+            borderColor: 'green'
           }}
         >
           {subDesignOptions.map((subDesign) => (
@@ -140,8 +198,8 @@ const DoorModel = () => {
 
       <div
         style={{
-          width: '700px',
-          minWidth: '700px',
+          width: '1000px',
+          minWidth: '1000px',
           background: '#fff',
           border: '1px solid #dcdcdc',
           borderRadius: '8px',
@@ -209,6 +267,17 @@ const DoorModel = () => {
                 ) : (
                   <span>{item.modelName}</span>
                 )}
+
+                <FormControlLabel control={<Checkbox />} label="Use Common Model" />
+
+                <Button
+                  variant="contained"
+                  onClick={() => openUploadDialog(true, item._id)}
+                  startIcon={<ViewInArIcon />}
+                  endIcon={<CloudUploadIcon />}
+                >
+                  Upload 3D Model
+                </Button>
               </div>
             </div>
 
@@ -236,6 +305,86 @@ const DoorModel = () => {
           </div>
         ))}
       </div>
+
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Upload Door Model</DialogTitle>
+
+        <DialogContent>
+          <Grid container spacing={3} sx={{ mt: 1 }}>
+            {/* Model File */}
+            <Grid item xs={12}>
+              <Button variant="outlined" component="label" fullWidth>
+                Upload Model (.glb, .fbx, .obj)
+                <input
+                  type="file"
+                  hidden
+                  accept=".glb"
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      modelFile: e.target.files[0]
+                    })
+                  }
+                />
+              </Button>
+
+              {form.modelFile && <p>{form.modelFile.name}</p>}
+            </Grid>
+
+            <img src={`http://localhost:5000/src/assets/doors/textures/elite/LE_1/1783154572017.jpeg"`}/>
+
+            {/* Main Texture */}
+            <Grid item xs={12}>
+              <Button variant="outlined" component="label" fullWidth>
+                Upload Main Texture
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      mainTexture: e.target.files[0]
+                    })
+                  }
+                />
+              </Button>
+
+              {form.mainTexture && <p>{form.mainTexture.name}</p>}
+            </Grid>
+
+            {/* Seamless Texture Dropdown */}
+            <Grid item xs={12}>
+              <TextField
+                select
+                fullWidth
+                label="Seamless Texture"
+                value={form.seamlessTexture}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    seamlessTexture: e.target.value
+                  })
+                }
+              >
+                {seamlessTextures.map((item) => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpen(false)}>Cancel</Button>
+
+          <Button variant="contained" onClick={() => uploadModel()}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
