@@ -15,5 +15,6 @@
   DOOR_SUB_DESIGN:"/door-sub-design",
   DOOR_MODEL:"/door-models",
   DOOR_FRAME_TYPES:"/door-frame-types",
-  DOOR_FRAME_TYPE_OPTIONS:"/door-frame-type-options"
+  DOOR_FRAME_TYPE_OPTIONS:"/door-frame-type-options",
+  DOOR_SHADE:"/door-shade"
 };

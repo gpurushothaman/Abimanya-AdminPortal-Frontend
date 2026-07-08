@@ -11,29 +11,51 @@ import {
   DialogContent,
   DialogActions,
   Grid,
+  Card,
+  Box,
+  Typography,
+  Tooltip,
   TextField,
-  MenuItem,
-  Box
+  Divider,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Avatar,
+  DialogContentText
 } from '@mui/material';
 import ViewInArIcon from '@mui/icons-material/ViewInAr';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import IconButton from '@mui/material/IconButton';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import ImageIcon from '@mui/icons-material/Image';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteOutlineIcon from '@mui/icons-material/Delete';
 
 //Toast
 import { useToast } from '../../contexts/ToastContext';
 //api
+import { getDoorShades, createDoorShade, deleteDoorShade } from '../../services/doorShadeService';
 import { getDoorModels, updateDoorModel } from '../../services/doorModelService';
 
 const DoorModel = () => {
   const SERVER_URL = import.meta.env.VITE_SERVER_URL;
   const { showToast } = useToast();
   const [options, setOptions] = useState([]);
+  const [shadesList, setShadesList] = useState([]);
   const [selectedSubDesign, setSelectedSubDesign] = useState('');
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [shadeData, setShadeData] = useState(null);
 
   const [open, setOpen] = useState(false);
   const [modelData, setModelData] = useState(null);
   const [previewTexture, setPreviewTexture] = useState(false);
+
+  const [shadesOpen, setShadesOpen] = useState(false);
 
   const [form, setForm] = useState({
     modelFile: null,
@@ -44,14 +66,16 @@ const DoorModel = () => {
     mainTextureFilePath: null
   });
 
-  const seamlessTextures = [
-    { id: 'oak', name: 'Oak' },
-    { id: 'walnut', name: 'Walnut' },
-    { id: 'teak', name: 'Teak' }
-  ];
+  const [shadeForm, setShadeForm] = useState({
+    shadeFile: null,
+    texturePath: null,
+    textureFileName: null,
+    shadeName: null
+  });
 
   useEffect(() => {
     getModels();
+    getShades();
   }, []);
 
   useEffect(() => {
@@ -66,6 +90,18 @@ const DoorModel = () => {
       const responseData = response?.data;
       if (responseData?.success) {
         setOptions(responseData?.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getShades = async () => {
+    try {
+      const response = await getDoorShades();
+      const responseData = response?.data;
+      if (responseData?.success) {
+        setShadesList(responseData?.data);
       }
     } catch (error) {
       console.error(error);
@@ -102,15 +138,58 @@ const DoorModel = () => {
     }
   };
 
-  const uploadModel = async () => {
-    if (modelData && (form?.modelFile || form?.mainTexture) && ( form?.modelFileName && form?.mainTextureFileName)) {
+  const createShade = async () => {
+    console.log(shadeForm);
+    if (modelData && shadeForm?.shadeFile && shadeForm?.shadeName) {
       try {
         const formData = new FormData();
-        formData.append('modelFile', form?.modelFile);
-        formData.append('mainTexture', form?.mainTexture);
+        formData.append('shadeName', shadeForm?.shadeName);
+        formData.append('shadeTexture', shadeForm?.shadeFile);
         formData.append('subDesignValue', modelData?.subDesignId?.subDesignValue);
         formData.append('modelValue', modelData?.modelValue);
-        formData.append('seamlessTexture', '');
+        formData.append('seamlessTextureID', '');
+        formData.append('modelId', modelData?._id);
+
+        const response = await createDoorShade(formData);
+        if (response?.data?.success) {
+          console.log('data:=', response);
+
+          setShadeForm({
+            ...form,
+            shadeFile: null,
+            texturePath: null,
+            textureFileName: null,
+            shadeName: null
+          });
+
+          setShadesList((prev) => [...prev, response.data.data]);
+
+          showToast('Door shade created successfully', 'success');
+        } else {
+          showToast('Door shade not created', 'error');
+        }
+      } catch (error) {
+        console.error(error);
+        showToast('Something went wrong', 'error');
+      }
+    } else {
+      showToast('Please fill all values in the form', 'error');
+    }
+  };
+
+  const uploadModel = async () => {
+    if (modelData && (form?.modelFile || form?.mainTexture) && form?.modelFileName && form?.mainTextureFileName) {
+      try {
+        const formData = new FormData();
+        if (form?.modelFile) {
+          formData.append('modelFile', form?.modelFile);
+        }
+        if (form?.mainTexture) {
+          formData.append('mainTexture', form?.mainTexture);
+        }
+        formData.append('subDesignValue', modelData?.subDesignId?.subDesignValue);
+        formData.append('modelValue', modelData?.modelValue);
+        formData.append('modelSeamlessTextureID', '');
 
         const response = await updateDoorModel(modelData?._id, formData);
         if (response?.data?.success) {
@@ -132,6 +211,8 @@ const DoorModel = () => {
 
           setForm({
             ...form,
+            modelFile: null,
+            mainTexture: null,
             modelFileName: response.data.data?.modelFileName,
             mainTextureFileName: response.data.data?.modelMainTextureFileName,
             mainTextureFilePath: response.data.data?.modelMainTexturePath
@@ -144,7 +225,7 @@ const DoorModel = () => {
         console.error(error);
         showToast('Something went wrong', 'error');
       }
-    }else{
+    } else {
       showToast('Please upload the file', 'error');
     }
   };
@@ -211,6 +292,15 @@ const DoorModel = () => {
     e.target.value = '';
   };
 
+  const uploadShadeTexturefn = (e) => {
+    setShadeForm({
+      ...shadeForm,
+      shadeFile: e.target.files[0],
+      textureFileName: e.target.files[0]?.name
+    });
+    e.target.value = '';
+  };
+
   const uploadModelfn = (e) => {
     setForm({
       ...form,
@@ -219,6 +309,37 @@ const DoorModel = () => {
     });
     e.target.value = '';
   };
+
+  const openShadesDialog = (status, updateId) => {
+    const filtered = options.filter((item) => item._id === updateId)?.[0];
+    setModelData(filtered);
+    setShadesOpen(status);
+  };
+
+  const handleDeleteShade = (shadeID) =>{
+    const filtered = shadesList.filter((shade) => shade._id === shadeID)?.[0];
+    setShadeData(filtered);    
+    setDeleteOpen(true);
+  }
+
+  const shadeConformDelete = async() =>{
+    try {      
+      const { data } = await deleteDoorShade(shadeData?._id,modelData?.subDesignId?.subDesignValue,modelData?.modelValue);
+      if (data.success) {
+        setShadesList(shadesList.filter((shade) => shade._id !== shadeData?._id));
+
+        showToast('Door shade deleted successfully', 'success');
+        setDeleteOpen(false);
+      } else {
+        showToast('Door shade not delete', 'error');
+      }
+    } catch (error) {
+      console.error(error);
+      showToast('Something went wrong', 'error');
+    }
+  }
+  
+
   return (
     <div style={{ padding: '25px' }}>
       <h2
@@ -333,6 +454,15 @@ const DoorModel = () => {
                 >
                   Upload 3D Model
                 </Button>
+
+                <Button
+                  variant="contained"
+                  onClick={() => openShadesDialog(true, item._id)}
+                  startIcon={<ViewInArIcon />}
+                  endIcon={<CloudUploadIcon />}
+                >
+                  Upload Shades
+                </Button>
               </div>
             </div>
 
@@ -361,80 +491,92 @@ const DoorModel = () => {
         ))}
       </div>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
+      {/*Door models - upload dialog*/}
+
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Upload Door Model</DialogTitle>
 
         <DialogContent>
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            {/* Model File */}
-            <Grid item xs={12}>
-              <Button variant="outlined" component="label" fullWidth>
-                Upload Model (.glb, .fbx, .obj)
-                <input type="file" hidden accept=".glb" onChange={(e) => uploadModelfn(e)} />
-              </Button>
+          <Card elevation={3} sx={{ p: 3, borderRadius: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Upload Assets
+            </Typography>
 
-              {<p>{form?.modelFileName || ''}</p>}
+            <Grid container spacing={3}>
+              {/* Model Upload */}
+              <Grid size={{ xs: 12 }}>
+                <Stack spacing={1}>
+                  <Button variant="contained" component="label" startIcon={<UploadFileIcon />}>
+                    Upload Model (.glb)
+                    <input hidden type="file" accept=".glb" onChange={uploadModelfn} />
+                  </Button>
+
+                  <Typography variant="body2" color="text.secondary">
+                    {form?.modelFileName || 'No model selected'}
+                  </Typography>
+                </Stack>
+              </Grid>
+
+              {/* Texture Upload */}
+              <Grid size={{ xs: 12 }}>
+                <Stack spacing={2}>
+                  <Button variant="contained" component="label" startIcon={<ImageIcon />}>
+                    Upload Main Texture
+                    <input hidden type="file" accept="image/*" onChange={uploadMainTexturefn} />
+                  </Button>
+
+                  <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        flex: 1,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {form?.mainTextureFileName || 'No texture selected'}
+                    </Typography>
+
+                    {form?.mainTextureFilePath && (
+                      <Tooltip title={previewTexture ? 'Hide Preview' : 'Show Preview'}>
+                        <IconButton onClick={() => setPreviewTexture((prev) => !prev)}>
+                          <VisibilityIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Stack>
+
+                  {previewTexture && form?.mainTextureFilePath && (
+                    <Box
+                      sx={{
+                        width: 180,
+                        height: 180,
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        boxShadow: 2,
+                        mx: 'auto'
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={`${SERVER_URL}/${form.mainTextureFilePath}`}
+                        alt="Texture Preview"
+                        sx={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    </Box>
+                  )}
+                </Stack>
+              </Grid>
             </Grid>
-
-            {/* <img src={`${SERVER_URL}/assets/doors/textures/elite/LE_1/1783154572017.jpeg`}/> */}
-
-            {/* Main Texture */}
-            <Grid item xs={12}>
-              <Button variant="outlined" component="label" fullWidth>
-                Upload Main Texture
-                <input type="file" hidden accept="image/*" onChange={(e) => uploadMainTexturefn(e)} />
-              </Button>
-
-              {<p>{form?.mainTextureFileName || ''}</p>}
-
-              <IconButton onClick={() => setPreviewTexture(!previewTexture)}>
-                <VisibilityIcon />
-              </IconButton>
-            </Grid>
-
-            {/* Seamless Texture Dropdown */}
-            <Grid item xs={12}>
-              <TextField
-                select
-                fullWidth
-                label="Seamless Texture"
-                value={form.seamlessTexture}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    seamlessTexture: e.target.value
-                  })
-                }
-              >
-                {seamlessTextures.map((item) => (
-                  <MenuItem key={item.id} value={item.id}>
-                    {item.name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-          </Grid>
-          {previewTexture && (
-            <Box
-              sx={{
-                width: 120,
-                height: 120,
-                borderRadius: '50%',
-                overflow: 'hidden',
-                border: '2px solid #ddd'
-              }}
-            >
-              <img
-                src={`${SERVER_URL}/${form?.mainTextureFilePath}`}
-                alt="Texture"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-            </Box>
-          )}
+          </Card>
         </DialogContent>
 
         <DialogActions>
@@ -442,6 +584,122 @@ const DoorModel = () => {
 
           <Button variant="contained" onClick={() => uploadModel()}>
             Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/*Manage shades - upload dialog*/}
+
+      <Dialog open={shadesOpen} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ m: 0, p: 2 }}>
+          Manage Shades
+          <IconButton
+            aria-label="close"
+            onClick={() => setShadesOpen(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500]
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent>
+          {/* Add Shade */}
+
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField
+              label="Shade Name"
+              value={shadeForm?.shadeName || ''}
+              fullWidth
+              onChange={(e) => {
+                setShadeForm({
+                  ...shadeForm,
+                  shadeName: e.target.value
+                });
+              }}
+            />
+
+            <Stack direction="row" spacing={2}>
+              <Button component="label" variant="outlined">
+                Upload Image
+                <input hidden type="file" accept="image/*" onChange={uploadShadeTexturefn} />
+              </Button>
+              {shadeForm?.textureFileName || 'No texture selected'}
+
+              <Button variant="contained" onClick={() => createShade()}>
+                Save
+              </Button>
+            </Stack>
+          </Stack>
+
+          <Divider sx={{ my: 3 }} />
+
+          <Typography variant="h6" gutterBottom>
+            Existing Shades
+          </Typography>
+
+          <TableContainer component={Paper} sx={{ mt: 3 }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell width={90}>Image</TableCell>
+                  <TableCell>Shade Name</TableCell>
+                  <TableCell align="center" width={100}>
+                    Actions
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {shadesList.map((shade) => (
+                  <TableRow key={shade._id} hover>
+                    <TableCell>
+                      <Avatar
+                        variant="rounded"
+                        src={`${SERVER_URL}/${shade.texturePath}`}
+                        sx={{
+                          width: 60,
+                          height: 60
+                        }}
+                      />
+                    </TableCell>
+
+                    <TableCell>{shade.shadeName}</TableCell>
+
+                    <TableCell align="center">
+                      <Tooltip title="Delete Shade">
+                        <IconButton
+                          color="error"
+                           onClick={() => handleDeleteShade(shade?._id)}
+                        >
+                          <DeleteOutlineIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
+        <DialogTitle>Delete Shade</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>Are you sure you want to delete this shade?</DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
+
+          <Button color="error" variant="contained" onClick={() => shadeConformDelete()}>
+            Delete
           </Button>
         </DialogActions>
       </Dialog>
