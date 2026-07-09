@@ -16,5 +16,6 @@
   DOOR_MODEL:"/door-models",
   DOOR_FRAME_TYPES:"/door-frame-types",
   DOOR_FRAME_TYPE_OPTIONS:"/door-frame-type-options",
-  DOOR_SHADE:"/door-shade"
+  DOOR_SHADE:"/door-shade",
+  DOOR_SEAMLESS_TEXTURE:"/door-seamless-texture",
 };

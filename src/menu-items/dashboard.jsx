@@ -54,6 +54,14 @@ const dashboard = {
     breadcrumbs:false
   },
   {
+    id :'door-seamless-texture',
+    title:'Door Seamless Texture',
+    type:'item',
+    url:'/door-seamless-texture',
+    icon: icons.DashboardOutlined,
+    breadcrumbs:false
+  },
+  {
     id :'door-models',
     title:'Door Models',
     type:'item',

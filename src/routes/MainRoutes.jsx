@@ -18,6 +18,7 @@ import SubDesign from '../pages/doorsubdesign/SubDesign';
 import DoorModel from '../pages/doormodel/DoorModel';
 import DoorFrameType from '../pages/doorFrameType/DoorFrameType';
 import DoorFrameTypeOptions from '../pages/doorFrameTypeoptions/DoorFrameTypeOptions';
+import DoorSeamlessTexture from '../pages/doorSeamlessTexture/DoorSeamlessTexture';
 
 // render- Dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -97,7 +98,11 @@ const MainRoutes = {
    {
     path:'dimension',
     element:<Dimension/>
-   }
+   },
+   {
+    path:'door-seamless-texture',
+    element:<DoorSeamlessTexture/>
+   },
    
     
   ]

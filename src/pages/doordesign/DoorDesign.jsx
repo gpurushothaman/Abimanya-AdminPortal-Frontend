@@ -2,24 +2,20 @@ import { useState, useEffect } from 'react';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { useToast } from '../../contexts/ToastContext';
-import { getDoorDesigns,  updateDoorDesigns} from '../../services/doorDesignService';
+import { getDoorDesigns, updateDoorDesigns } from '../../services/doorDesignService';
 
-const DoorDesign=()=> {
+const DoorDesign = () => {
   const { showToast } = useToast();
   const [doors, setDoors] = useState([]);
 
-  
   useEffect(() => {
     doorgetDesigns();
   }, []);
-    useEffect(() => {
-  
-    }, [doors]);
 
   const doorgetDesigns = async () => {
     try {
       const response = await getDoorDesigns();
-    console.log("DESIGN RESPONSE =>", response);
+      console.log('DESIGN RESPONSE =>', response);
       if (response?.data?.success) {
         setDoors(response?.data?.data);
       }
@@ -28,11 +24,9 @@ const DoorDesign=()=> {
     }
   };
 
-
-
   const saveDimension = async (flag, opt, updateId) => {
     if (flag) {
-      try {        
+      try {
         const response = await updateDoorDesigns(updateId, opt);
         if (response?.data?.success) {
           showToast('Design option updated successfully', 'success');
@@ -46,16 +40,13 @@ const DoorDesign=()=> {
     }
   };
 
-
-
-
   const handleEdit = (id, flag) => {
     setDoors(doors.map((item) => (item._id === id ? { ...item, editing: !item.editing } : item)));
     const result = doors.filter((item) => item._id === id)?.[0];
     saveDimension(flag, result, id);
   };
 
-  const handleChange = (id, value, category) => { 
+  const handleChange = (id, value, category) => {
     setDoors((prev) =>
       prev.map((item) => {
         if (item._id !== id) return item;
@@ -70,20 +61,15 @@ const DoorDesign=()=> {
           const updated = {
             ...item,
             status: value
-          };  
-          saveDimension(true, updated, id);        
-          return updated;      
+          };
+          saveDimension(true, updated, id);
+          return updated;
         }
       })
     );
   };
 
-
-
-
-
-
- return (
+  return (
     <div style={{ padding: '25px' }}>
       <h2
         style={{

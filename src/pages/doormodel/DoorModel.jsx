@@ -36,9 +36,8 @@ import ImageIcon from '@mui/icons-material/Image';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/Delete';
-import EditIcon from "@mui/icons-material/Edit";
-import CheckIcon from "@mui/icons-material/Check";
-
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
 
 //Toast
 import { useToast } from '../../contexts/ToastContext';
@@ -681,122 +680,104 @@ const DoorModel = () => {
           </Typography>
 
           <Card elevation={3} sx={{ borderRadius: 3 }}>
-  <CardHeader
-    title="Door Shades"
-    subheader={`${shadesList.length} Shades`}
-    sx={{
-      bgcolor: "primary.main",
-      color: "white",
-      "& .MuiCardHeader-subheader": {
-        color: "rgba(255,255,255,0.7)",
-      },
-    }}
-  />
+            <CardHeader
+              title="Door Shades"
+              subheader={`${shadesList.length} Shades`}
+              sx={{
+                bgcolor: 'primary.main',
+                color: 'white',
+                '& .MuiCardHeader-subheader': {
+                  color: 'rgba(255,255,255,0.7)'
+                }
+              }}
+            />
 
-  <TableContainer>
-    <Table>
-      <TableHead>
-        <TableRow
-          sx={{
-            bgcolor: "grey.100",
-            "& th": {
-              fontWeight: 700,
-              fontSize: 15,
-            },
-          }}
-        >
-          <TableCell>Image</TableCell>
-          <TableCell>Shade Name</TableCell>
-          <TableCell>Status</TableCell>
-          <TableCell align="center">Actions</TableCell>
-        </TableRow>
-      </TableHead>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow
+                    sx={{
+                      bgcolor: 'grey.100',
+                      '& th': {
+                        fontWeight: 700,
+                        fontSize: 15
+                      }
+                    }}
+                  >
+                    <TableCell>Image</TableCell>
+                    <TableCell>Shade Name</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell align="center">Actions</TableCell>
+                  </TableRow>
+                </TableHead>
 
-      <TableBody>
-        {shadesList.map((shade) => (
-          <TableRow
-            key={shade._id}
-            hover
-            sx={{
-              transition: "0.2s",
-              "&:hover": {
-                bgcolor: "action.hover",
-              },
-            }}
-          >
-            <TableCell>
-              <Avatar
-                variant="rounded"
-                src={`${SERVER_URL}/${shade.texturePath}`}
-                sx={{
-                  width: 65,
-                  height: 65,
-                  borderRadius: 2,
-                }}
-              />
-            </TableCell>
+                <TableBody>
+                  {shadesList.map((shade) => (
+                    <TableRow
+                      key={shade._id}
+                      hover
+                      sx={{
+                        transition: '0.2s',
+                        '&:hover': {
+                          bgcolor: 'action.hover'
+                        }
+                      }}
+                    >
+                      <TableCell>
+                        <Avatar
+                          variant="rounded"
+                          src={`${SERVER_URL}/${shade.texturePath}`}
+                          sx={{
+                            width: 65,
+                            height: 65,
+                            borderRadius: 2
+                          }}
+                        />
+                      </TableCell>
 
-            <TableCell>
-              {shade.editing ? (
-                <TextField
-                  size="small"
-                  fullWidth
-                  value={shade.shadeName}
-                  onChange={(e) =>
-                    updateShade(shade._id, e.target.value, "shadeName")
-                  }
-                />
-              ) : (
-                <Typography fontWeight={600}>
-                  {shade.shadeName}
-                </Typography>
-              )}
-            </TableCell>
+                      <TableCell>
+                        {shade.editing ? (
+                          <TextField
+                            size="small"
+                            fullWidth
+                            value={shade.shadeName}
+                            onChange={(e) => updateShade(shade._id, e.target.value, 'shadeName')}
+                          />
+                        ) : (
+                          <Typography fontWeight={600}>{shade.shadeName}</Typography>
+                        )}
+                      </TableCell>
 
-            <TableCell>
-              <Stack direction="row" spacing={2} alignItems="center">
-                <Switch
-                  checked={shade.status}
-                  onChange={(e) =>
-                    updateShade(shade._id, e.target.checked, "status")
-                  }
-                />
+                      <TableCell>
+                        <Stack direction="row" spacing={2} alignItems="center">
+                          <Switch checked={shade.status} onChange={(e) => updateShade(shade._id, e.target.checked, 'status')} />
 
-                <Chip
-                  size="small"
-                  label={shade.status ? "Active" : "Inactive"}
-                  color={shade.status ? "success" : "default"}
-                />
-              </Stack>
-            </TableCell>
+                          <Chip size="small" label={shade.status ? 'Active' : 'Inactive'} color={shade.status ? 'success' : 'default'} />
+                        </Stack>
+                      </TableCell>
 
-            <TableCell align="center">
-              <Tooltip title={shade.editing ? "Save" : "Edit"}>
-                <IconButton
-                  color={shade.editing ? "success" : "primary"}
-                  onClick={() =>
-                    handleEditShade(shade._id, shade.editing)
-                  }
-                >
-                  {shade.editing ? <CheckIcon /> : <EditIcon />}
-                </IconButton>
-              </Tooltip>
+                      <TableCell align="center">
+                        <Tooltip title={shade.editing ? 'Save' : 'Edit'}>
+                          <IconButton
+                            color={shade.editing ? 'success' : 'primary'}
+                            onClick={() => handleEditShade(shade._id, shade.editing)}
+                          >
+                            {shade.editing ? <CheckIcon /> : <EditIcon />}
+                          </IconButton>
+                        </Tooltip>
 
-              <Tooltip title="Delete">
-                <IconButton
-                  color="error"
-                  onClick={() => handleDeleteShade(shade._id)}
-                >
-                  <DeleteOutlineIcon />
-                </IconButton>
-              </Tooltip>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  </TableContainer>
-</Card>
+                        <Tooltip title="Delete">
+                          <IconButton color="error" onClick={() => handleDeleteShade(shade._id)}>
+                            <DeleteOutlineIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Card>
         </DialogContent>
       </Dialog>
 
