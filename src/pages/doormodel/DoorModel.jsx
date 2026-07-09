@@ -17,7 +17,6 @@ import {
   Tooltip,
   TextField,
   Divider,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -25,7 +24,9 @@ import {
   TableHead,
   TableRow,
   Avatar,
-  DialogContentText
+  DialogContentText,
+  CardHeader,
+  Chip
 } from '@mui/material';
 import ViewInArIcon from '@mui/icons-material/ViewInAr';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -35,11 +36,14 @@ import ImageIcon from '@mui/icons-material/Image';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/Delete';
+import EditIcon from "@mui/icons-material/Edit";
+import CheckIcon from "@mui/icons-material/Check";
+
 
 //Toast
 import { useToast } from '../../contexts/ToastContext';
 //api
-import { getDoorShades, createDoorShade, deleteDoorShade } from '../../services/doorShadeService';
+import { getDoorShades, createDoorShade, deleteDoorShade, updateDoorShade } from '../../services/doorShadeService';
 import { getDoorModels, updateDoorModel } from '../../services/doorModelService';
 
 const DoorModel = () => {
@@ -138,8 +142,47 @@ const DoorModel = () => {
     }
   };
 
+  const saveShade = async (shadeID, updatedShade) => {
+    try {
+      const response = await updateDoorShade(shadeID, updatedShade);
+
+      if (response?.data?.success) {
+        showToast('Door shade updated successfully', 'success');
+      } else {
+        showToast('Door shade not updated', 'error');
+      }
+    } catch (error) {
+      console.error(error);
+      showToast('Something went wrong', 'error');
+    }
+  };
+
+  const updateShade = async (shadeID, value, control) => {
+    const shade = shadesList.filter((shade) => shade._id === shadeID)?.[0];
+
+    if (!shade) return;
+
+    const updatedShade = {
+      ...shade,
+      [control]: value
+    };
+    setShadesList((prev) => prev.map((shade) => (shade._id === shadeID ? updatedShade : shade)));
+
+    if (control === 'status') {
+      saveShade(shadeID, updatedShade);
+    }
+  };
+
+  const handleEditShade = (id, flag) => {
+    setShadesList(shadesList.map((shade) => (shade._id === id ? { ...shade, editing: !shade?.editing } : shade)));
+
+    const result = shadesList.filter((shade) => shade._id === id)?.[0];
+    if (flag) {
+      saveShade(id, result);
+    }
+  };
+
   const createShade = async () => {
-    console.log(shadeForm);
     if (modelData && shadeForm?.shadeFile && shadeForm?.shadeName) {
       try {
         const formData = new FormData();
@@ -152,8 +195,6 @@ const DoorModel = () => {
 
         const response = await createDoorShade(formData);
         if (response?.data?.success) {
-          console.log('data:=', response);
-
           setShadeForm({
             ...form,
             shadeFile: null,
@@ -193,8 +234,6 @@ const DoorModel = () => {
 
         const response = await updateDoorModel(modelData?._id, formData);
         if (response?.data?.success) {
-          console.log('data:=', response);
-
           setOptions((prev) =>
             prev.map((item) =>
               item._id === response.data.data._id
@@ -316,15 +355,15 @@ const DoorModel = () => {
     setShadesOpen(status);
   };
 
-  const handleDeleteShade = (shadeID) =>{
+  const handleDeleteShade = (shadeID) => {
     const filtered = shadesList.filter((shade) => shade._id === shadeID)?.[0];
-    setShadeData(filtered);    
+    setShadeData(filtered);
     setDeleteOpen(true);
-  }
+  };
 
-  const shadeConformDelete = async() =>{
-    try {      
-      const { data } = await deleteDoorShade(shadeData?._id,modelData?.subDesignId?.subDesignValue,modelData?.modelValue);
+  const shadeConformDelete = async () => {
+    try {
+      const { data } = await deleteDoorShade(shadeData?._id, modelData?.subDesignId?.subDesignValue, modelData?.modelValue);
       if (data.success) {
         setShadesList(shadesList.filter((shade) => shade._id !== shadeData?._id));
 
@@ -337,8 +376,7 @@ const DoorModel = () => {
       console.error(error);
       showToast('Something went wrong', 'error');
     }
-  }
-  
+  };
 
   return (
     <div style={{ padding: '25px' }}>
@@ -642,49 +680,123 @@ const DoorModel = () => {
             Existing Shades
           </Typography>
 
-          <TableContainer component={Paper} sx={{ mt: 3 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell width={90}>Image</TableCell>
-                  <TableCell>Shade Name</TableCell>
-                  <TableCell align="center" width={100}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
+          <Card elevation={3} sx={{ borderRadius: 3 }}>
+  <CardHeader
+    title="Door Shades"
+    subheader={`${shadesList.length} Shades`}
+    sx={{
+      bgcolor: "primary.main",
+      color: "white",
+      "& .MuiCardHeader-subheader": {
+        color: "rgba(255,255,255,0.7)",
+      },
+    }}
+  />
 
-              <TableBody>
-                {shadesList.map((shade) => (
-                  <TableRow key={shade._id} hover>
-                    <TableCell>
-                      <Avatar
-                        variant="rounded"
-                        src={`${SERVER_URL}/${shade.texturePath}`}
-                        sx={{
-                          width: 60,
-                          height: 60
-                        }}
-                      />
-                    </TableCell>
+  <TableContainer>
+    <Table>
+      <TableHead>
+        <TableRow
+          sx={{
+            bgcolor: "grey.100",
+            "& th": {
+              fontWeight: 700,
+              fontSize: 15,
+            },
+          }}
+        >
+          <TableCell>Image</TableCell>
+          <TableCell>Shade Name</TableCell>
+          <TableCell>Status</TableCell>
+          <TableCell align="center">Actions</TableCell>
+        </TableRow>
+      </TableHead>
 
-                    <TableCell>{shade.shadeName}</TableCell>
+      <TableBody>
+        {shadesList.map((shade) => (
+          <TableRow
+            key={shade._id}
+            hover
+            sx={{
+              transition: "0.2s",
+              "&:hover": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <TableCell>
+              <Avatar
+                variant="rounded"
+                src={`${SERVER_URL}/${shade.texturePath}`}
+                sx={{
+                  width: 65,
+                  height: 65,
+                  borderRadius: 2,
+                }}
+              />
+            </TableCell>
 
-                    <TableCell align="center">
-                      <Tooltip title="Delete Shade">
-                        <IconButton
-                          color="error"
-                           onClick={() => handleDeleteShade(shade?._id)}
-                        >
-                          <DeleteOutlineIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+            <TableCell>
+              {shade.editing ? (
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={shade.shadeName}
+                  onChange={(e) =>
+                    updateShade(shade._id, e.target.value, "shadeName")
+                  }
+                />
+              ) : (
+                <Typography fontWeight={600}>
+                  {shade.shadeName}
+                </Typography>
+              )}
+            </TableCell>
+
+            <TableCell>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Switch
+                  checked={shade.status}
+                  onChange={(e) =>
+                    updateShade(shade._id, e.target.checked, "status")
+                  }
+                />
+
+                <Chip
+                  size="small"
+                  label={shade.status ? "Active" : "Inactive"}
+                  color={shade.status ? "success" : "default"}
+                />
+              </Stack>
+            </TableCell>
+
+            <TableCell align="center">
+              <Tooltip title={shade.editing ? "Save" : "Edit"}>
+                <IconButton
+                  color={shade.editing ? "success" : "primary"}
+                  onClick={() =>
+                    handleEditShade(shade._id, shade.editing)
+                  }
+                >
+                  {shade.editing ? <CheckIcon /> : <EditIcon />}
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Delete">
+                <IconButton
+                  color="error"
+                  onClick={() => handleDeleteShade(shade._id)}
+                >
+                  <DeleteOutlineIcon />
+                </IconButton>
+              </Tooltip>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </TableContainer>
+</Card>
         </DialogContent>
       </Dialog>
 

@@ -22,3 +22,5 @@ export const deleteDoorShade = (id, subDesignValue, modelValue) =>
       modelValue
     }
   });
+
+export const updateDoorShade = (id, data) => api.put(`${ENDPOINTS.DOOR_SHADE}/${id}`, data);
