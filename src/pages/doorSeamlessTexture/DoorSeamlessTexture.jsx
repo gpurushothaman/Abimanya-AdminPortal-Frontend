@@ -241,7 +241,7 @@ export default function DoorSeamlessTexture() {
 
           <FormControl size="small" sx={{ minWidth: 260 }}>
             <InputLabel>Design</InputLabel>
-            <Select label="Design" value={seamlessTextureForm?.designId || ''} onChange={(e) => setSearchTerm(e.target.value)}>
+            <Select label="Design" value={searchTerm || ''} onChange={(e) => setSearchTerm(e.target.value)}>
               {doorDesigns.map((design) => (
                 <MenuItem key={design._id} value={design._id}>
                   {design.designName}
