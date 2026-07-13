@@ -55,18 +55,25 @@ export default function DoorSeamlessTexture() {
     textureName: null,
     designId: null,
     designValue: null,
-    previewTexture: null
+    previewTexture: null,
+    status: 'inactive',
+    textureId: null
   });
   const [open, setOpen] = useState(false);
   const [doorDesigns, setDoorDesigns] = useState([]);
   const [seamlessTextureList, setSeamlessTextureList] = useState([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [textureData, setTextureData] = useState(null);
+  const [editStatus, setEditStatus] = useState(false);
 
   useEffect(() => {
     getAllDoorDesigns();
     getAllSeamlessTexture();
   }, []);
+
+  useEffect(() => {
+    console.log(seamlessTextureList);
+  }, [seamlessTextureList]);
 
   const getAllSeamlessTexture = async () => {
     try {
@@ -135,18 +142,32 @@ export default function DoorSeamlessTexture() {
   };
 
   const handleEditTexture = (id, flag) => {
+    setEditStatus(true);
     setSeamlessTextureList(
       seamlessTextureList.map((texture) => (texture._id === id ? { ...texture, editing: !texture?.editing } : texture))
     );
 
     const result = seamlessTextureList.filter((texture) => texture._id === id)?.[0];
-    if (flag) {
-      saveTexture(id, result);
-    }
+    const designId = typeof result?.designRefId === 'object' ? result?.designRefId?._id : result?.designRefId;
+    const designData = doorDesigns.filter((design) => design._id === designId)?.[0];
+    setOpen(true);
+
+    setSeamlessTextureForm({
+      ...seamlessTextureForm,
+      seamlessTexture: null,
+      texturePath: result?.texturePath,
+      textureFileName: result?.textureFileName,
+      textureName: result?.textureName,
+      designId: designData?._id,
+      designValue: designData?.designValue,
+      previewTexture: `${SERVER_URL}/${result?.texturePath}`,
+      status: result?.status ? 'active' : 'inactive',
+      textureId: result?._id
+    });
   };
 
   const createSeamlessTexture = async () => {
-    if (seamlessTextureForm?.seamlessTexture && seamlessTextureForm?.textureName) {
+    if (seamlessTextureForm?.textureFileName && seamlessTextureForm?.textureName) {
       try {
         const formData = new FormData();
         formData.append('seamlessTexture', seamlessTextureForm?.seamlessTexture);
@@ -154,6 +175,9 @@ export default function DoorSeamlessTexture() {
         formData.append('designRefId', seamlessTextureForm?.designId);
         formData.append('designValue', seamlessTextureForm?.designValue);
         formData.append('status', seamlessTextureForm?.status === 'active' ? true : false);
+        if (editStatus) {
+          formData.append('textureId', seamlessTextureForm?.textureId);
+        }
 
         const response = await createDoorSeamlessTexture(formData);
         if (response?.data?.success) {
@@ -166,7 +190,19 @@ export default function DoorSeamlessTexture() {
             previewTexture: null
           });
 
-          setSeamlessTextureList((prev) => [...prev, response.data.data]);
+          setSeamlessTextureList((prev) => {
+            const index = prev.findIndex((item) => item._id === response.data.data._id);
+
+            if (index !== -1) {
+              // update texture
+              const updated = [...prev];
+              updated[index] = response.data.data;
+              return updated;
+            }
+
+            // Create texture
+            return [...prev, response.data.data];
+          });
           setOpen(false);
 
           showToast('Door seamless texture created successfully', 'success');
@@ -184,13 +220,15 @@ export default function DoorSeamlessTexture() {
 
   const handleDeleteTexture = (textureID) => {
     const filtered = seamlessTextureList.filter((texture) => texture._id === textureID)?.[0];
+    console.log(filtered);
     setTextureData(filtered);
     setDeleteOpen(true);
   };
 
   const textureConformDelete = async () => {
     try {
-      const filtered = doorDesigns.filter((design) => design._id === textureData?.designRefId?._id)?.[0];
+      const designId = typeof textureData?.designRefId === 'object' ? textureData?.designRefId?._id : textureData?.designRefId;
+      const filtered = doorDesigns.filter((design) => design._id === designId)?.[0];
 
       const { data } = await deleteDoorSeamlessTexture(textureData?._id, filtered?.designValue);
       if (data.success) {
@@ -254,7 +292,10 @@ export default function DoorSeamlessTexture() {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setOpen(true);
+            setEditStatus(false);
+          }}
           sx={{
             px: 3,
             py: 1,
@@ -311,16 +352,7 @@ export default function DoorSeamlessTexture() {
                 </td>
 
                 <td style={tdStyle}>
-                  {texture.editing ? (
-                    <TextField
-                      size="small"
-                      fullWidth
-                      value={texture.textureName}
-                      onChange={(e) => updateTexture(texture._id, e.target.value, 'textureName')}
-                    />
-                  ) : (
-                    <Typography fontWeight={600}>{texture.textureName}</Typography>
-                  )}
+                  <Typography fontWeight={600}>{texture.textureName}</Typography>
                 </td>
 
                 <td style={tdStyle}>
@@ -337,12 +369,9 @@ export default function DoorSeamlessTexture() {
                 </td>
 
                 <td style={tdStyle}>
-                  <Tooltip title={texture.editing ? 'Save' : 'Edit'}>
-                    <IconButton
-                      color={texture.editing ? 'success' : 'primary'}
-                      onClick={() => handleEditTexture(texture._id, texture.editing)}
-                    >
-                      {texture.editing ? <CheckIcon /> : <EditIcon />}
+                  <Tooltip title={'Edit'}>
+                    <IconButton color={'success'} onClick={() => handleEditTexture(texture._id, texture.editing)}>
+                      <EditIcon />
                     </IconButton>
                   </Tooltip>
 
