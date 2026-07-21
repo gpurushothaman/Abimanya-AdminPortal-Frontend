@@ -71,10 +71,6 @@ export default function DoorSeamlessTexture() {
     getAllSeamlessTexture();
   }, []);
 
-  useEffect(() => {
-    console.log(seamlessTextureList);
-  }, [seamlessTextureList]);
-
   const getAllSeamlessTexture = async () => {
     try {
       const response = await getDoorSeamlessTexture();
@@ -246,7 +242,11 @@ export default function DoorSeamlessTexture() {
   };
 
   const filteredTextures = seamlessTextureList.filter((texture) => {
-    return !searchTerm || texture.designRefId?._id === searchTerm;
+    const designId = typeof texture.designRefId === 'object' ? texture.designRefId?._id : texture.designRefId;
+
+    const matchesSearch = !searchTerm || designId === searchTerm;
+
+    return matchesSearch;
   });
 
   return (

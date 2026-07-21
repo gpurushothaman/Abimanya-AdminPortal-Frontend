@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-
+import Zoom from 'react-medium-image-zoom';
+import 'react-medium-image-zoom/dist/styles.css';
 import {
   Checkbox,
   Switch,
@@ -26,7 +27,14 @@ import {
   Avatar,
   DialogContentText,
   CardHeader,
-  Chip
+  Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  List,
+  ListItem,
+  Radio
 } from '@mui/material';
 import ViewInArIcon from '@mui/icons-material/ViewInAr';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -44,6 +52,8 @@ import { useToast } from '../../contexts/ToastContext';
 //api
 import { getDoorShades, createDoorShade, deleteDoorShade, updateDoorShade } from '../../services/doorShadeService';
 import { getDoorModels, updateDoorModel } from '../../services/doorModelService';
+import { getDoorSeamlessTexture } from '../../services/doorSeamlessTextureService';
+import { getDoorDesigns } from '../../services/doorDesignService';
 
 const DoorModel = () => {
   const SERVER_URL = import.meta.env.VITE_SERVER_URL;
@@ -53,6 +63,9 @@ const DoorModel = () => {
   const [selectedSubDesign, setSelectedSubDesign] = useState('');
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [shadeData, setShadeData] = useState(null);
+  const [doorDesigns, setDoorDesigns] = useState([]);
+  const [seamlessTextures, setSeamlessTextures] = useState([]);
+  const [searchTexture, setSearchTexture] = useState('');
 
   const [open, setOpen] = useState(false);
   const [modelData, setModelData] = useState(null);
@@ -63,7 +76,7 @@ const DoorModel = () => {
   const [form, setForm] = useState({
     modelFile: null,
     mainTexture: null,
-    seamlessTexture: '',
+    seamlessTextureId: null,
     modelFileName: null,
     mainTextureFileName: null,
     mainTextureFilePath: null
@@ -73,12 +86,15 @@ const DoorModel = () => {
     shadeFile: null,
     texturePath: null,
     textureFileName: null,
-    shadeName: null
+    shadeName: null,
+    seamlessTextureId: null
   });
 
   useEffect(() => {
     getModels();
     getShades();
+    getSeamlessTextures();
+    getAllDoorDesigns();
   }, []);
 
   useEffect(() => {
@@ -86,6 +102,29 @@ const DoorModel = () => {
       setSelectedSubDesign(options[0]?.subDesignId?.subDesignValue);
     }
   }, [options]);
+
+  const getAllDoorDesigns = async () => {
+    try {
+      const response = await getDoorDesigns();
+      if (response?.data?.success) {
+        setDoorDesigns(response?.data?.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getSeamlessTextures = async () => {
+    try {
+      const response = await getDoorSeamlessTexture();
+      const responseData = response?.data;
+      if (responseData?.success) {
+        setSeamlessTextures(responseData?.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const getModels = async () => {
     try {
@@ -182,14 +221,14 @@ const DoorModel = () => {
   };
 
   const createShade = async () => {
-    if (modelData && shadeForm?.shadeFile && shadeForm?.shadeName) {
+    if (modelData && shadeForm?.shadeFile && shadeForm?.shadeName && shadeForm?.seamlessTextureId) {
       try {
         const formData = new FormData();
         formData.append('shadeName', shadeForm?.shadeName);
         formData.append('shadeTexture', shadeForm?.shadeFile);
         formData.append('subDesignValue', modelData?.subDesignId?.subDesignValue);
         formData.append('modelValue', modelData?.modelValue);
-        formData.append('seamlessTextureID', '');
+        formData.append('seamlessTextureID', shadeForm?.seamlessTextureId);
         formData.append('modelId', modelData?._id);
 
         const response = await createDoorShade(formData);
@@ -199,7 +238,8 @@ const DoorModel = () => {
             shadeFile: null,
             texturePath: null,
             textureFileName: null,
-            shadeName: null
+            shadeName: null,
+            seamlessTextureId: null
           });
 
           setShadesList((prev) => [...prev, response.data.data]);
@@ -218,7 +258,7 @@ const DoorModel = () => {
   };
 
   const uploadModel = async () => {
-    if (modelData && (form?.modelFile || form?.mainTexture) && form?.modelFileName && form?.mainTextureFileName) {
+    if (modelData && form?.modelFileName && form?.mainTextureFileName) {
       try {
         const formData = new FormData();
         if (form?.modelFile) {
@@ -229,7 +269,7 @@ const DoorModel = () => {
         }
         formData.append('subDesignValue', modelData?.subDesignId?.subDesignValue);
         formData.append('modelValue', modelData?.modelValue);
-        formData.append('modelSeamlessTextureID', '');
+        formData.append('modelSeamlessTextureID', form?.seamlessTextureId);
 
         const response = await updateDoorModel(modelData?._id, formData);
         if (response?.data?.success) {
@@ -241,7 +281,8 @@ const DoorModel = () => {
                     modelPath: response.data.data.modelPath,
                     modelFileName: response.data.data.modelFileName,
                     modelMainTextureFileName: response.data.data.modelMainTextureFileName,
-                    modelMainTexturePath: response.data.data.modelMainTexturePath
+                    modelMainTexturePath: response.data.data.modelMainTexturePath,
+                    modelSeamlessTextureID: response.data.data.modelSeamlessTextureID
                   }
                 : item
             )
@@ -253,7 +294,8 @@ const DoorModel = () => {
             mainTexture: null,
             modelFileName: response.data.data?.modelFileName,
             mainTextureFileName: response.data.data?.modelMainTextureFileName,
-            mainTextureFilePath: response.data.data?.modelMainTexturePath
+            mainTextureFilePath: response.data.data?.modelMainTexturePath,
+            seamlessTextureId: response.data.data.modelSeamlessTextureID
           });
           showToast('Door Model option updated successfully', 'success');
         } else {
@@ -310,14 +352,14 @@ const DoorModel = () => {
 
   const openUploadDialog = (status, updateId) => {
     const filtered = options.filter((item) => item._id === updateId)?.[0];
-    console.log(filtered);
     setModelData(filtered);
     setOpen(status);
     setForm({
       ...form,
       modelFileName: filtered?.modelFileName,
       mainTextureFileName: filtered?.modelMainTextureFileName,
-      mainTextureFilePath: filtered?.modelMainTexturePath
+      mainTextureFilePath: filtered?.modelMainTexturePath,
+      seamlessTextureId: filtered?.modelSeamlessTextureID
     });
   };
 
@@ -348,6 +390,20 @@ const DoorModel = () => {
     e.target.value = '';
   };
 
+  const chooseSeamlesstexturefn = (textureID, type) => {
+    if (type === 'model') {
+      setForm({
+        ...form,
+        seamlessTextureId: textureID
+      });
+    } else if (type === 'shades') {
+      setShadeForm({
+        ...shadeForm,
+        seamlessTextureId: textureID
+      });
+    }
+  };
+
   const openShadesDialog = (status, updateId) => {
     const filtered = options.filter((item) => item._id === updateId)?.[0];
     setModelData(filtered);
@@ -376,6 +432,10 @@ const DoorModel = () => {
       showToast('Something went wrong', 'error');
     }
   };
+
+  const filteredSeamlessTextures = seamlessTextures.filter((texture) => {
+    return !searchTexture || texture.designRefId?._id === searchTexture;
+  });
 
   return (
     <div style={{ padding: '25px' }}>
@@ -610,6 +670,63 @@ const DoorModel = () => {
                       />
                     </Box>
                   )}
+
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1 }}>
+                      Select Door Design
+                    </Typography>
+
+                    <FormControl size="small" sx={{ minWidth: 260 }}>
+                      <InputLabel>Design</InputLabel>
+                      <Select label="Design" value={searchTexture || ''} onChange={(e) => setSearchTexture(e.target.value)}>
+                        {doorDesigns.map((design) => (
+                          <MenuItem key={design._id} value={design._id}>
+                            {design.designName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+
+                  <List sx={{ width: 400 }}>
+                    {filteredSeamlessTextures.map((item) => (
+                      <ListItem
+                        key={item._id}
+                        // onClick={() => setSelected(item.id)}
+                        sx={{
+                          height: 80,
+                          border: '1px solid #ddd',
+                          borderRadius: 1,
+                          mb: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Zoom>
+                          <Box
+                            component="img"
+                            src={`${SERVER_URL}/${item.texturePath}`}
+                            alt={item.textureName}
+                            sx={{
+                              width: 60,
+                              height: 60,
+                              borderRadius: 1,
+                              objectFit: 'cover',
+                              mr: 2
+                            }}
+                          />
+                        </Zoom>
+
+                        <Typography sx={{ flex: 1 }}>{item.textureName}</Typography>
+
+                        <Radio
+                          checked={form?.seamlessTextureId === item._id}
+                          onChange={(e) => chooseSeamlesstexturefn(item._id, 'model')}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
                 </Stack>
               </Grid>
             </Grid>
@@ -647,31 +764,105 @@ const DoorModel = () => {
         <DialogContent>
           {/* Add Shade */}
 
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
-              label="Shade Name"
-              value={shadeForm?.shadeName || ''}
-              fullWidth
-              onChange={(e) => {
-                setShadeForm({
-                  ...shadeForm,
-                  shadeName: e.target.value
-                });
-              }}
-            />
+          <Card sx={{ p: 3, mx: 'auto' }}>
+            <Typography variant="h6" gutterBottom>
+              Create Shade
+            </Typography>
 
-            <Stack direction="row" spacing={2}>
-              <Button component="label" variant="outlined">
-                Upload Image
-                <input hidden type="file" accept="image/*" onChange={uploadShadeTexturefn} />
-              </Button>
-              {shadeForm?.textureFileName || 'No texture selected'}
+            <Stack spacing={3}>
+              {/* Shade Name */}
+              <TextField
+                fullWidth
+                label="Shade Name"
+                placeholder="Enter shade name"
+                value={shadeForm?.shadeName || ''}
+                onChange={(e) =>
+                  setShadeForm({
+                    ...shadeForm,
+                    shadeName: e.target.value
+                  })
+                }
+              />
 
-              <Button variant="contained" onClick={() => createShade()}>
-                Save
+              {/* Upload */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                  Texture Image
+                </Typography>
+
+                <Button component="label" variant="outlined" fullWidth>
+                  Upload Image
+                  <input hidden type="file" accept="image/*" onChange={uploadShadeTexturefn} />
+                </Button>
+
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  {shadeForm?.textureFileName || 'No texture selected'}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1 }}>
+                  Select Door Design
+                </Typography>
+
+                <FormControl size="small" sx={{ minWidth: 260 }}>
+                  <InputLabel>Design</InputLabel>
+                  <Select label="Design" value={searchTexture || ''} onChange={(e) => setSearchTexture(e.target.value)}>
+                    {doorDesigns.map((design) => (
+                      <MenuItem key={design._id} value={design._id}>
+                        {design.designName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+
+              <List sx={{ width: 400 }}>
+                {filteredSeamlessTextures.map((item) => (
+                  <ListItem
+                    key={item._id}
+                    // onClick={() => setSelected(item.id)}
+                    sx={{
+                      height: 80,
+                      border: '1px solid #ddd',
+                      borderRadius: 1,
+                      mb: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Zoom>
+                      <Box
+                        component="img"
+                        src={`${SERVER_URL}/${item.texturePath}`}
+                        alt={item.textureName}
+                        sx={{
+                          width: 60,
+                          height: 60,
+                          borderRadius: 1,
+                          objectFit: 'cover',
+                          mr: 2
+                        }}
+                      />
+                    </Zoom>
+
+                    <Typography sx={{ flex: 1 }}>{item.textureName}</Typography>
+
+                    <Radio
+                      checked={shadeForm?.seamlessTextureId === item._id || false}
+                      onChange={(e) => chooseSeamlesstexturefn(item._id, 'shades')}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+
+              {/* Save Button */}
+              <Button variant="contained" size="large" fullWidth onClick={createShade}>
+                Save Shade
               </Button>
             </Stack>
-          </Stack>
+          </Card>
 
           <Divider sx={{ my: 3 }} />
 
