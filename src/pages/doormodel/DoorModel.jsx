@@ -874,127 +874,89 @@ const DoorModel = () => {
                   }}
                 />
 
-<Box
-  sx={{
-    maxHeight: 450,
-    overflowY: "auto",
-    pr: 1,
-
-    "&::-webkit-scrollbar": {
-      width: 6,
-    },
-    "&::-webkit-scrollbar-thumb": {
-      backgroundColor: "#bbb",
-      borderRadius: 10,
-    },
-  }}
->
-
-  <Grid container spacing={1.5}>
-
-    {filteredSeamlessTextures.map((item) => {
-
-      const selected =
-        shadeForm?.seamlessTextureId === item._id;
-
-
-      return (
-
-        <Grid
-          item
-          xs={12}
-          sm={6}
-          key={item._id}
-        >
-
-          <Box
-            onClick={() =>
-              chooseSeamlesstexturefn(item._id, "shades")
-            }
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              p: 1,
-              cursor: "pointer",
-              borderRadius: 2,
-
-              border: selected
-                ? "2px solid #1976d2"
-                : "1px solid #ddd",
-
-              bgcolor: selected
-                ? "rgba(25,118,210,.08)"
-                : "white",
-
-              "&:hover": {
-                bgcolor: "#f5f5f5",
-              },
-            }}
-          >
-
-            {/* LEFT RADIO */}
-            <Radio
-              checked={selected}
-              size="small"
-              sx={{ p: 0.5 }}
-            />
-
-
-            {/* IMAGE */}
-            <Box
-              onClick={(e) =>
-                e.stopPropagation()
-              }
-              sx={{
-                ml: 1,
-                mr: 1.5,
-              }}
-            >
-
-              <Zoom>
-
                 <Box
-                  component="img"
-                  src={`${SERVER_URL}/${item.texturePath}`}
-                  alt={item.textureName}
                   sx={{
-                    width: 55,
-                    height: 55,
-                    borderRadius: 1,
-                    objectFit: "cover",
-                    cursor: "zoom-in",
+                    maxHeight: 450,
+                    overflowY: 'auto',
+                    pr: 1,
+
+                    '&::-webkit-scrollbar': {
+                      width: 6
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      backgroundColor: '#bbb',
+                      borderRadius: 10
+                    }
                   }}
-                />
+                >
+                  <Grid container spacing={1.5}>
+                    {filteredSeamlessTextures.map((item) => {
+                      const selected = shadeForm?.seamlessTextureId === item._id;
 
-              </Zoom>
+                      return (
+                        <Grid item xs={12} sm={6} key={item._id}>
+                          <Box
+                            onClick={() => chooseSeamlesstexturefn(item._id, 'shades')}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              p: 1,
+                              cursor: 'pointer',
+                              borderRadius: 2,
 
-            </Box>
+                              border: selected ? '2px solid #1976d2' : '1px solid #ddd',
 
+                              bgcolor: selected ? 'rgba(25,118,210,.08)' : 'white',
 
-            {/* NAME */}
-            <Typography
-              variant="body2"
-              fontWeight={600}
-              noWrap
-              sx={{
-                flex: 1,
-              }}
-            >
-              {item.textureName}
-            </Typography>
+                              '&:hover': {
+                                bgcolor: '#f5f5f5'
+                              }
+                            }}
+                          >
+                            {/* LEFT RADIO */}
+                            <Radio checked={selected} size="small" sx={{ p: 0.5 }} />
 
+                            {/* IMAGE */}
+                            <Box
+                              onClick={(e) => e.stopPropagation()}
+                              sx={{
+                                ml: 1,
+                                mr: 1.5
+                              }}
+                            >
+                              <Zoom>
+                                <Box
+                                  component="img"
+                                  src={`${SERVER_URL}/${item.texturePath}`}
+                                  alt={item.textureName}
+                                  sx={{
+                                    width: 55,
+                                    height: 55,
+                                    borderRadius: 1,
+                                    objectFit: 'cover',
+                                    cursor: 'zoom-in'
+                                  }}
+                                />
+                              </Zoom>
+                            </Box>
 
-          </Box>
-
-        </Grid>
-
-      );
-
-    })}
-
-  </Grid>
-
-</Box>
+                            {/* NAME */}
+                            <Typography
+                              variant="body2"
+                              fontWeight={600}
+                              noWrap
+                              sx={{
+                                flex: 1
+                              }}
+                            >
+                              {item.textureName}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
+                </Box>
               </Card>
 
               {/* Save Button */}
