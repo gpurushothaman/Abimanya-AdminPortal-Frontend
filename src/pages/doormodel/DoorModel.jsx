@@ -13,6 +13,7 @@ import {
   DialogActions,
   Grid,
   Card,
+  CardContent,
   Box,
   Typography,
   Tooltip,
@@ -34,7 +35,11 @@ import {
   MenuItem,
   List,
   ListItem,
-  Radio
+  Radio,
+  InputAdornment,
+  Autocomplete,
+  CardActionArea,
+  CardMedia
 } from '@mui/material';
 import ViewInArIcon from '@mui/icons-material/ViewInAr';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -88,6 +93,14 @@ const DoorModel = () => {
     textureFileName: null,
     shadeName: null,
     seamlessTextureId: null
+  });
+
+  const [doorThicknessBasedCost, setDoorThicknessBasedCost] = useState({
+    32: '',
+    40: '',
+    45: '',
+    50: '',
+    55: ''
   });
 
   useEffect(() => {
@@ -230,6 +243,7 @@ const DoorModel = () => {
         formData.append('modelValue', modelData?.modelValue);
         formData.append('seamlessTextureID', shadeForm?.seamlessTextureId);
         formData.append('modelId', modelData?._id);
+        formData.append('doorThicknessBasedCost', JSON.stringify(doorThicknessBasedCost));
 
         const response = await createDoorShade(formData);
         if (response?.data?.success) {
@@ -240,6 +254,15 @@ const DoorModel = () => {
             textureFileName: null,
             shadeName: null,
             seamlessTextureId: null
+          });
+
+          setDoorThicknessBasedCost({
+            ...doorThicknessBasedCost,
+            32: '',
+            40: '',
+            45: '',
+            50: '',
+            55: ''
           });
 
           setShadesList((prev) => [...prev, response.data.data]);
@@ -800,62 +823,141 @@ const DoorModel = () => {
                 </Typography>
               </Box>
 
-              <Box>
-                <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1 }}>
-                  Select Door Design
+              <Card elevation={2} sx={{ mt: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Door Thickness Cost
+                  </Typography>
+
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    Set the additional cost for each door thickness.
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    {Object.entries(doorThicknessBasedCost).map(([thickness, cost]) => (
+                      <Grid item xs={12} sm={6} md={4} key={thickness}>
+                        <TextField
+                          fullWidth
+                          type="number"
+                          label={`${thickness} mm`}
+                          value={cost}
+                          onChange={(e) =>
+                            setDoorThicknessBasedCost((prev) => ({
+                              ...prev,
+                              [thickness]: Number(e.target.value)
+                            }))
+                          }
+                          InputProps={{
+                            startAdornment: <InputAdornment position="start">₹</InputAdornment>
+                          }}
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+                </CardContent>
+              </Card>
+
+              <Card elevation={2} sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Select seamless texture
                 </Typography>
 
-                <FormControl size="small" sx={{ minWidth: 260 }}>
-                  <InputLabel>Design</InputLabel>
-                  <Select label="Design" value={searchTexture || ''} onChange={(e) => setSearchTexture(e.target.value)}>
-                    {doorDesigns.map((design) => (
-                      <MenuItem key={design._id} value={design._id}>
-                        {design.designName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
+                <Autocomplete
+                  options={doorDesigns}
+                  getOptionLabel={(option) => option.designName}
+                  value={doorDesigns.find((d) => d._id === searchTexture) || null}
+                  onChange={(_, value) => setSearchTexture(value?._id || '')}
+                  renderInput={(params) => <TextField {...params} label="Search Design" size="small" />}
+                  sx={{
+                    mb: 3,
+                    maxWidth: 400
+                  }}
+                />
 
-              <List sx={{ width: 400 }}>
-                {filteredSeamlessTextures.map((item) => (
-                  <ListItem
-                    key={item._id}
-                    // onClick={() => setSelected(item.id)}
-                    sx={{
-                      height: 80,
-                      border: '1px solid #ddd',
-                      borderRadius: 1,
-                      mb: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <Zoom>
-                      <Box
-                        component="img"
-                        src={`${SERVER_URL}/${item.texturePath}`}
-                        alt={item.textureName}
-                        sx={{
-                          width: 60,
-                          height: 60,
-                          borderRadius: 1,
-                          objectFit: 'cover',
-                          mr: 2
-                        }}
-                      />
-                    </Zoom>
+                <Box
+                  sx={{
+                    maxHeight: 450,
+                    overflowY: 'auto',
+                    pr: 1,
 
-                    <Typography sx={{ flex: 1 }}>{item.textureName}</Typography>
+                    '&::-webkit-scrollbar': {
+                      width: 6
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      backgroundColor: '#bbb',
+                      borderRadius: 10
+                    }
+                  }}
+                >
+                  <Grid container spacing={1.5}>
+                    {filteredSeamlessTextures.map((item) => {
+                      const selected = shadeForm?.seamlessTextureId === item._id;
 
-                    <Radio
-                      checked={shadeForm?.seamlessTextureId === item._id || false}
-                      onChange={(e) => chooseSeamlesstexturefn(item._id, 'shades')}
-                    />
-                  </ListItem>
-                ))}
-              </List>
+                      return (
+                        <Grid item xs={12} sm={6} key={item._id}>
+                          <Box
+                            onClick={() => chooseSeamlesstexturefn(item._id, 'shades')}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              p: 1,
+                              cursor: 'pointer',
+                              borderRadius: 2,
+
+                              border: selected ? '2px solid #1976d2' : '1px solid #ddd',
+
+                              bgcolor: selected ? 'rgba(25,118,210,.08)' : 'white',
+
+                              '&:hover': {
+                                bgcolor: '#f5f5f5'
+                              }
+                            }}
+                          >
+                            {/* LEFT RADIO */}
+                            <Radio checked={selected} size="small" sx={{ p: 0.5 }} />
+
+                            {/* IMAGE */}
+                            <Box
+                              onClick={(e) => e.stopPropagation()}
+                              sx={{
+                                ml: 1,
+                                mr: 1.5
+                              }}
+                            >
+                              <Zoom>
+                                <Box
+                                  component="img"
+                                  src={`${SERVER_URL}/${item.texturePath}`}
+                                  alt={item.textureName}
+                                  sx={{
+                                    width: 55,
+                                    height: 55,
+                                    borderRadius: 1,
+                                    objectFit: 'cover',
+                                    cursor: 'zoom-in'
+                                  }}
+                                />
+                              </Zoom>
+                            </Box>
+
+                            {/* NAME */}
+                            <Typography
+                              variant="body2"
+                              fontWeight={600}
+                              noWrap
+                              sx={{
+                                flex: 1
+                              }}
+                            >
+                              {item.textureName}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
+                </Box>
+              </Card>
 
               {/* Save Button */}
               <Button variant="contained" size="large" fullWidth onClick={createShade}>
