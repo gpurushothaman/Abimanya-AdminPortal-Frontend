@@ -425,7 +425,7 @@ const DoorModel = () => {
 };
 
   const uploadModel = async () => {
-    if (modelData && form?.modelFileName && form?.mainTextureFileName) {
+    if (modelData && (form?.modelFileName || form?.mainTextureFileName)) {
       try {
         const formData = new FormData();
         if (form?.modelFile) {
