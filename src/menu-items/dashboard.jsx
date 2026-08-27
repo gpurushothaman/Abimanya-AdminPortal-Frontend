@@ -96,6 +96,14 @@ const dashboard = {
     icon: icons.DashboardOutlined,
     breadcrumbs:false
   },
+  {
+    id :'door-frame-type-section',
+    title:'Door Frame Type Section',
+    type:'item',
+    url:'/door-frame-type-section',
+    icon: icons.DashboardOutlined,
+    breadcrumbs:false
+  },
   
   
   {

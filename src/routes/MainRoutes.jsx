@@ -19,6 +19,7 @@ import DoorModel from '../pages/doormodel/DoorModel';
 import DoorFrameType from '../pages/doorFrameType/DoorFrameType';
 import DoorFrameTypeOptions from '../pages/doorFrameTypeoptions/DoorFrameTypeOptions';
 import DoorSeamlessTexture from '../pages/doorSeamlessTexture/DoorSeamlessTexture';
+import DoorFrameTypeSection from '../pages/doorFrameTypeSection/DoorFrameTypeSection';
 
 // render- Dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -57,6 +58,10 @@ const MainRoutes = {
    {
     path:'door-frame-type-options',
     element:<DoorFrameTypeOptions/>
+   },
+   {
+    path:'door-frame-type-section',
+    element:<DoorFrameTypeSection/>
    },
    
    {

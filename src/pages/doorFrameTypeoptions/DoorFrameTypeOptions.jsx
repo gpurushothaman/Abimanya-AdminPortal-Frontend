@@ -145,16 +145,14 @@ const DoorFrameTypeOptions = () => {
     });
   };
 
+
   const handleDesignChange = (e) => {
     const id = e.target.value;
-
     setSelectedDesign(id);
     setSelectedSubDesign('');
     setSelectedFrame('');
     setSelectedFrameType('');
-
     const design = designs.find((d) => d._id === id);
-
     setSubDesigns(design?.subdesign || []);
     setFrames([]);
     setFrameTypes([]);
@@ -163,26 +161,21 @@ const DoorFrameTypeOptions = () => {
 
   const handleSubDesignChange = (e) => {
     const id = e.target.value;
-
     setSelectedSubDesign(id);
     setSelectedFrame('');
     setSelectedFrameType('');
-
     const sub = subDesigns.find((s) => s._id === id);
-
     setFrames(sub?.frame || []);
     setFrameTypes([]);
     setOptions([]);
   };
 
+
   const handleFrameChange = (e) => {
     const id = e.target.value;
-
     setSelectedFrame(id);
     setSelectedFrameType('');
-
     const frame = frames.find((f) => f._id === id);
-
     setFrameTypes(frame?.frameTypes || []);
     setOptions([]);
   };
@@ -190,10 +183,10 @@ const DoorFrameTypeOptions = () => {
   const handleFrameTypeChange = (e) => {
     const id = e.target.value;
     setSelectedFrameType(id);
-
     const frameType = frameTypes.find((f) => f._id === id);
     setOptions(frameType?.options || []);
   };
+  
   return (
     <div style={{ padding: '25px' }}>
       <h2 style={{ marginBottom: '20px', color: '#333', fontWeight: '600' }}>Door Frame Type Options</h2>
