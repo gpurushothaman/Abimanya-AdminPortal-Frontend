@@ -572,7 +572,7 @@ const DoorModel = () => {
   };
 
   const openShadesDialog = (status, updateId) => {
-    const filtered = options.filter((item) => item._id === updateId)?.[0];
+    const filtered = options.filter((item) => item._id === updateId)?.[0];  
     setModelData(filtered);
     setShadesOpen(status);
   };
@@ -1206,7 +1206,7 @@ const DoorModel = () => {
                 </TableHead>
 
                 <TableBody>
-                  {shadesList.map((shade) => (
+                  {shadesList?.filter((shade) => (shade.modelId?._id) === (modelData?._id))?.map((shade) => (
                     <TableRow
                       key={shade._id}
                       hover
