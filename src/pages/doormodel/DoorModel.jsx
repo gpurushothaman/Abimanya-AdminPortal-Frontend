@@ -72,7 +72,6 @@ const DoorModel = () => {
   const [seamlessTextures, setSeamlessTextures] = useState([]);
   const [searchTexture, setSearchTexture] = useState('');
 
-
   const [open, setOpen] = useState(false);
   const [modelData, setModelData] = useState(null);
   const [previewTexture, setPreviewTexture] = useState(false);
@@ -110,8 +109,7 @@ const DoorModel = () => {
     status: true
   });
 
-
-  // Thiyaguuuuu ---> 
+  // Thiyaguuuuu --->
   const [doorThicknessBasedCost, setDoorThicknessBasedCost] = useState({
     32: '',
     35: '',
@@ -244,31 +242,31 @@ const DoorModel = () => {
       saveShade(shadeID, updatedShade);
     }
   };
-                                                      // thiyaguu    ------------------>>>>>>>>>>>>>>>
+  // thiyaguu    ------------------>>>>>>>>>>>>>>>
   const handleEditShade = (shade) => {
-  setEditingShade(shade);
-  setShadeForm({
-    shadeFile: null,
-    // Existing image
-    texturePath: shade?.texturePath || '',
-    textureFileName: shade?.textureFileName || '',
-    // Existing name
-    shadeName: shade?.shadeName || '',
-    // Existing seamless texture
-    seamlessTextureId: shade?.seamlessTextureId || '',
-    // Existing costs
-    thickness: {
-      32: shade?.doorThicknessBasedCost?.['32'] ?? '',
-      35: shade?.doorThicknessBasedCost?.['35'] ?? '',
-      38: shade?.doorThicknessBasedCost?.['38'] ?? '',
-      40: shade?.doorThicknessBasedCost?.['40'] ?? '',
-      45: shade?.doorThicknessBasedCost?.['45'] ?? '',
-      50: shade?.doorThicknessBasedCost?.['50'] ?? ''
-    },
-    // Existing status
-    status: shade?.status ?? true
-  });
-};
+    setEditingShade(shade);
+    setShadeForm({
+      shadeFile: null,
+      // Existing image
+      texturePath: shade?.texturePath || '',
+      textureFileName: shade?.textureFileName || '',
+      // Existing name
+      shadeName: shade?.shadeName || '',
+      // Existing seamless texture
+      seamlessTextureId: shade?.seamlessTextureId || '',
+      // Existing costs
+      thickness: {
+        32: shade?.doorThicknessBasedCost?.['32'] ?? '',
+        35: shade?.doorThicknessBasedCost?.['35'] ?? '',
+        38: shade?.doorThicknessBasedCost?.['38'] ?? '',
+        40: shade?.doorThicknessBasedCost?.['40'] ?? '',
+        45: shade?.doorThicknessBasedCost?.['45'] ?? '',
+        50: shade?.doorThicknessBasedCost?.['50'] ?? ''
+      },
+      // Existing status
+      status: shade?.status ?? true
+    });
+  };
 
   const createShade = async () => {
     if (modelData && shadeForm?.shadeFile && shadeForm?.shadeName && shadeForm?.seamlessTextureId) {
@@ -319,110 +317,83 @@ const DoorModel = () => {
     }
   };
 
-                                              // THiayguuuuuu  ------------------>>>>>>>>>>>
+  // THiayguuuuuu  ------------------>>>>>>>>>>>
   const updateShadeDetails = async () => {
-  if (!editingShade?._id) {
-    showToast('Shade not selected', 'error');
-    return;
-  }
+    if (!editingShade?._id) {
+      showToast('Shade not selected', 'error');
+      return;
+    }
 
-  try {
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
 
-    // Shade Name
-    formData.append('shadeName', shadeForm.shadeName);
+      // Shade Name
+      formData.append('shadeName', shadeForm.shadeName);
 
-    // Thickness Costs
-    formData.append(
-      'doorThicknessBasedCost',
-      JSON.stringify(shadeForm.thickness)
-    );
+      // Thickness Costs
+      formData.append('doorThicknessBasedCost', JSON.stringify(shadeForm.thickness));
 
-    // Seamless Texture
-    formData.append(
-      'seamlessTextureId',
-      shadeForm.seamlessTextureId || ''
-    );
+      // Seamless Texture
+      formData.append('seamlessTextureId', shadeForm.seamlessTextureId || '');
 
-    // Status
-    formData.append(
-      'status',
-      String(shadeForm.status)
-    );
+      // Status
+      formData.append('status', String(shadeForm.status));
 
-    // New Image - only if user selected a new image
-    if (shadeForm.shadeFile) {
+      // New Image - only if user selected a new image
+      if (shadeForm.shadeFile) {
+        formData.append('shadeTexture', shadeForm.shadeFile);
+      }
+
+      // Required for backend image folder
       formData.append(
-        'shadeTexture',
-        shadeForm.shadeFile
+        'subDesignValue',
+        editingShade?.modelId?.subDesignId?.subDesignValue ||
+          editingShade?.modelId?.subDesignValue ||
+          modelData?.subDesignId?.subDesignValue ||
+          ''
       );
+
+      formData.append('modelValue', editingShade?.modelId?.modelValue || modelData?.modelValue || '');
+
+      const response = await updateDoorShade(editingShade._id, formData);
+
+      if (response?.data?.success) {
+        showToast('Door shade updated successfully', 'success');
+
+        // Refresh shades
+        await getShades();
+
+        // Exit edit mode
+        setEditingShade(null);
+
+        // Reset form
+        setShadeForm({
+          shadeFile: null,
+          texturePath: null,
+          textureFileName: null,
+          shadeName: '',
+          seamlessTextureId: null,
+
+          thickness: {
+            32: '',
+            35: '',
+            38: '',
+            40: '',
+            45: '',
+            50: ''
+          },
+
+          status: true
+        });
+      } else {
+        showToast('Door shade not updated', 'error');
+      }
+    } catch (error) {
+      console.error('UPDATE SHADE ERROR:', error?.response?.data || error);
+
+      showToast(error?.response?.data?.message || 'Something went wrong', 'error');
     }
-
-    // Required for backend image folder
-    formData.append(
-      'subDesignValue',
-      editingShade?.modelId?.subDesignId?.subDesignValue ||
-        editingShade?.modelId?.subDesignValue ||
-        modelData?.subDesignId?.subDesignValue ||
-        ''
-    );
-
-    formData.append(
-      'modelValue',
-      editingShade?.modelId?.modelValue ||
-        modelData?.modelValue ||
-        ''
-    );
-
-    const response = await updateDoorShade(
-      editingShade._id,
-      formData
-    );
-
-    if (response?.data?.success) {
-      showToast('Door shade updated successfully', 'success');
-
-      // Refresh shades
-      await getShades();
-
-      // Exit edit mode
-      setEditingShade(null);
-
-      // Reset form
-      setShadeForm({
-        shadeFile: null,
-        texturePath: null,
-        textureFileName: null,
-        shadeName: '',
-        seamlessTextureId: null,
-
-        thickness: {
-          32: '',
-          35: '',
-          38: '',
-          40: '',
-          45: '',
-          50: ''
-        },
-
-        status: true
-      });
-    } else {
-      showToast('Door shade not updated', 'error');
-    }
-  } catch (error) {
-    console.error(
-      'UPDATE SHADE ERROR:',
-      error?.response?.data || error
-    );
-
-    showToast(
-      error?.response?.data?.message ||
-        'Something went wrong',
-      'error'
-    );
-  }
-};
+  };
 
   const uploadModel = async () => {
     if (modelData && (form?.modelFileName || form?.mainTextureFileName)) {
@@ -444,13 +415,13 @@ const DoorModel = () => {
             prev.map((item) =>
               item._id === response.data.data._id
                 ? {
-                  ...item,
-                  modelPath: response.data.data.modelPath,
-                  modelFileName: response.data.data.modelFileName,
-                  modelMainTextureFileName: response.data.data.modelMainTextureFileName,
-                  modelMainTexturePath: response.data.data.modelMainTexturePath,
-                  modelSeamlessTextureID: response.data.data.modelSeamlessTextureID
-                }
+                    ...item,
+                    modelPath: response.data.data.modelPath,
+                    modelFileName: response.data.data.modelFileName,
+                    modelMainTextureFileName: response.data.data.modelMainTextureFileName,
+                    modelMainTexturePath: response.data.data.modelMainTexturePath,
+                    modelSeamlessTextureID: response.data.data.modelSeamlessTextureID
+                  }
                 : item
             )
           );
@@ -486,9 +457,9 @@ const DoorModel = () => {
       options.map((item) =>
         item._id === id
           ? {
-            ...item,
-            editing: !item.editing
-          }
+              ...item,
+              editing: !item.editing
+            }
           : item
       )
     );
@@ -572,7 +543,7 @@ const DoorModel = () => {
   };
 
   const openShadesDialog = (status, updateId) => {
-    const filtered = options.filter((item) => item._id === updateId)?.[0];  
+    const filtered = options.filter((item) => item._id === updateId)?.[0];
     setModelData(filtered);
     setShadesOpen(status);
   };
@@ -964,10 +935,7 @@ const DoorModel = () => {
 
                 {/* Thiyaguuuu ----------------------->>>>>>>>>>>>> */}
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  {shadeForm?.textureFileName ||
-                    (editingShade?.texturePath
-                      ? 'Existing texture image'
-                      : 'No texture selected')}
+                  {shadeForm?.textureFileName || (editingShade?.texturePath ? 'Existing texture image' : 'No texture selected')}
                 </Typography>
 
                 {editingShade && shadeForm?.texturePath && (
@@ -985,8 +953,6 @@ const DoorModel = () => {
                     }}
                   />
                 )}
-
-
               </Box>
 
               <Card elevation={2} sx={{ mt: 2 }}>
@@ -1021,11 +987,7 @@ const DoorModel = () => {
                           // thiyagu ---------------->
                           slotProps={{
                             input: {
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  ₹
-                                </InputAdornment>
-                              )
+                              startAdornment: <InputAdornment position="start">₹</InputAdornment>
                             }
                           }}
                         />
@@ -1153,15 +1115,7 @@ const DoorModel = () => {
                 label={shadeForm.status ? 'Active' : 'Inactive'}
               />
 
-
-
-
-              <Button
-                variant="contained"
-                size="large"
-                fullWidth
-                onClick={editingShade ? updateShadeDetails : createShade}
-              >
+              <Button variant="contained" size="large" fullWidth onClick={editingShade ? updateShadeDetails : createShade}>
                 {editingShade ? 'Update Shade' : 'Save Shade'}
               </Button>
             </Stack>
@@ -1176,7 +1130,7 @@ const DoorModel = () => {
           <Card elevation={3} sx={{ borderRadius: 3 }}>
             <CardHeader
               title="Door Shades"
-              subheader={`${shadesList.length} Shades`}
+              subheader={`${shadesList?.filter((shade) => String(shade.modelId?._id) === String(modelData?._id))?.length} Shades`}
               sx={{
                 bgcolor: 'primary.main',
                 color: 'white',
@@ -1206,63 +1160,59 @@ const DoorModel = () => {
                 </TableHead>
 
                 <TableBody>
-                  {shadesList?.filter((shade) => (shade.modelId?._id) === (modelData?._id))?.map((shade) => (
-                    <TableRow
-                      key={shade._id}
-                      hover
-                      sx={{
-                        transition: '0.2s',
-                        '&:hover': {
-                          bgcolor: 'action.hover'
-                        }
-                      }}
-                    >
-                      <TableCell>
-                        <Avatar
-                          variant="rounded"
-                          src={`${SERVER_URL}/${shade.texturePath}`}
-                          sx={{
-                            width: 65,
-                            height: 65,
-                            borderRadius: 2
-                          }}
-                        />
-                      </TableCell>
+                  {shadesList
+                    ?.filter((shade) => shade.modelId?._id === modelData?._id)
+                    ?.map((shade) => (
+                      <TableRow
+                        key={shade._id}
+                        hover
+                        sx={{
+                          transition: '0.2s',
+                          '&:hover': {
+                            bgcolor: 'action.hover'
+                          }
+                        }}
+                      >
+                        <TableCell>
+                          <Avatar
+                            variant="rounded"
+                            src={`${SERVER_URL}/${shade.texturePath}`}
+                            sx={{
+                              width: 65,
+                              height: 65,
+                              borderRadius: 2
+                            }}
+                          />
+                        </TableCell>
 
-                      <TableCell>
+                        <TableCell>
+                          <Typography fontWeight={600}>{shade.shadeName}</Typography>
+                        </TableCell>
 
-                        <Typography fontWeight={600}>
-                          {shade.shadeName}
-                        </Typography>
-                      </TableCell>
+                        <TableCell>
+                          <Stack direction="row" spacing={2}>
+                            <Switch checked={shade.status} onChange={(e) => updateShade(shade._id, e.target.checked, 'status')} />
 
-                      <TableCell>
-                       <Stack direction="row" spacing={2}>
-                          <Switch checked={shade.status} onChange={(e) => updateShade(shade._id, e.target.checked, 'status')} />
+                            <Chip size="small" label={shade.status ? 'Active' : 'Inactive'} color={shade.status ? 'success' : 'default'} />
+                          </Stack>
+                        </TableCell>
 
-                          <Chip size="small" label={shade.status ? 'Active' : 'Inactive'} color={shade.status ? 'success' : 'default'} />
-                        </Stack>
-                      </TableCell>
+                        <TableCell align="center">
+                          {/* Thiyaguuuu            ------------->>>>>>>> */}
+                          <Tooltip title="Edit">
+                            <IconButton color="primary" onClick={() => handleEditShade(shade)}>
+                              <EditIcon />
+                            </IconButton>
+                          </Tooltip>
 
-                      <TableCell align="center">
-                        {/* Thiyaguuuu            ------------->>>>>>>> */}
-                        <Tooltip title="Edit">
-                          <IconButton
-                            color="primary"
-                            onClick={() => handleEditShade(shade)}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="Delete">
-                          <IconButton color="error" onClick={() => handleDeleteShade(shade._id)}>
-                            <DeleteOutlineIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          <Tooltip title="Delete">
+                            <IconButton color="error" onClick={() => handleDeleteShade(shade._id)}>
+                              <DeleteOutlineIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </TableContainer>
