@@ -75,6 +75,8 @@ const DoorModel = () => {
   const [open, setOpen] = useState(false);
   const [modelData, setModelData] = useState(null);
   const [previewTexture, setPreviewTexture] = useState(false);
+  const [previewTextureForRoughnessMap, setPreviewTextureForRoughnessMap] = useState(false);
+  const [previewTextureForNormalMap, setPreviewTextureForNormalMap] = useState(false);
 
   const [shadesOpen, setShadesOpen] = useState(false);
   // thiyagu
@@ -86,7 +88,13 @@ const DoorModel = () => {
     seamlessTextureId: null,
     modelFileName: null,
     mainTextureFileName: null,
-    mainTextureFilePath: null
+    mainTextureFilePath: null,
+    roughnessMapTexture : null,
+    roughnessMapFileName : null,
+    roughnessMapFilePath : null,
+    normalMapTexture : null,
+    normalMapFileName : null,
+    normalMapFilePath : null
   });
 
   // Thiagyaguu
@@ -396,7 +404,7 @@ const DoorModel = () => {
   };
 
   const uploadModel = async () => {
-    if (modelData && (form?.modelFileName || form?.mainTextureFileName)) {
+    if (modelData && (form?.modelFileName || form?.mainTextureFileName || form?.roughnessMapFileName || form?.normalMapFileName)) {
       try {
         const formData = new FormData();
         if (form?.modelFile) {
@@ -404,6 +412,12 @@ const DoorModel = () => {
         }
         if (form?.mainTexture) {
           formData.append('mainTexture', form?.mainTexture);
+        }
+        if (form?.roughnessMapTexture) {
+          formData.append('roughnessMapTexture', form?.roughnessMapTexture);
+        }
+        if (form?.normalMapTexture) {
+          formData.append('normalMapTexture', form?.normalMapTexture);
         }
         formData.append('subDesignValue', modelData?.subDesignId?.subDesignValue);
         formData.append('modelValue', modelData?.modelValue);
@@ -420,7 +434,11 @@ const DoorModel = () => {
                     modelFileName: response.data.data.modelFileName,
                     modelMainTextureFileName: response.data.data.modelMainTextureFileName,
                     modelMainTexturePath: response.data.data.modelMainTexturePath,
-                    modelSeamlessTextureID: response.data.data.modelSeamlessTextureID
+                    modelSeamlessTextureID: response.data.data.modelSeamlessTextureID,
+                    modelRoughnessMapTextureFileName: response.data.data.modelRoughnessMapTextureFileName,
+                    modelRoughnessMapTexturePath: response.data.data.modelRoughnessMapTexturePath,
+                    modelNormalMapTextureFileName: response.data.data.modelNormalMapTextureFileName,
+                    modelNormalMapTexturePath: response.data.data.modelNormalMapTexturePath,
                   }
                 : item
             )
@@ -433,7 +451,13 @@ const DoorModel = () => {
             modelFileName: response.data.data?.modelFileName,
             mainTextureFileName: response.data.data?.modelMainTextureFileName,
             mainTextureFilePath: response.data.data?.modelMainTexturePath,
-            seamlessTextureId: response.data.data.modelSeamlessTextureID
+            seamlessTextureId: response.data.data.modelSeamlessTextureID,
+            roughnessMapTexture : null,
+            roughnessMapFileName: response.data.data?.modelRoughnessMapTextureFileName,
+            roughnessMapFilePath: response.data.data?.modelRoughnessMapTexturePath,
+            normalMapTexture : null,
+            normalMapFileName : response.data.data?.modelNormalMapTextureFileName,
+            normalMapFilePath : response.data.data?.modelNormalMapTexturePath,
           });
           showToast('Door Model option updated successfully', 'success');
         } else {
@@ -497,7 +521,11 @@ const DoorModel = () => {
       modelFileName: filtered?.modelFileName,
       mainTextureFileName: filtered?.modelMainTextureFileName,
       mainTextureFilePath: filtered?.modelMainTexturePath,
-      seamlessTextureId: filtered?.modelSeamlessTextureID
+      seamlessTextureId: filtered?.modelSeamlessTextureID,
+      roughnessMapFileName: filtered?.modelRoughnessMapTextureFileName,
+      roughnessMapFilePath: filtered?.modelRoughnessMapTexturePath,
+      normalMapFileName : filtered?.modelNormalMapTextureFileName,
+      normalMapFilePath : filtered?.modelNormalMapTexturePath,
     });
   };
 
@@ -506,6 +534,26 @@ const DoorModel = () => {
       ...form,
       mainTexture: e.target.files[0],
       mainTextureFileName: e.target.files[0]?.name
+    });
+    e.target.value = '';
+  };
+
+
+  const uploadRoughnessMapfn = (e) => {
+    setForm({
+      ...form,
+      roughnessMapTexture: e.target.files[0],
+      roughnessMapFileName: e.target.files[0]?.name
+    });
+    e.target.value = '';
+  };
+
+
+  const uploadNormalMapfn = (e) => {
+    setForm({
+      ...form,
+      normalMapTexture: e.target.files[0],
+      normalMapFileName: e.target.files[0]?.name
     });
     e.target.value = '';
   };
@@ -808,6 +856,129 @@ const DoorModel = () => {
                       />
                     </Box>
                   )}
+
+
+
+
+                  <Button variant="contained" component="label" startIcon={<ImageIcon />}>
+                    Upload Roughness Map
+                    <input hidden type="file" accept="image/*" onChange={uploadRoughnessMapfn} />
+                  </Button>
+
+                  <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        flex: 1,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {form?.roughnessMapFileName || 'No texture selected'}
+                    </Typography>
+
+                    {form?.roughnessMapFilePath && (
+                      <Tooltip title={previewTextureForRoughnessMap ? 'Hide Preview' : 'Show Preview'}>
+                        <IconButton onClick={() => setPreviewTextureForRoughnessMap((prev) => !prev)}>
+                          <VisibilityIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Stack>
+
+                  {previewTextureForRoughnessMap && form?.roughnessMapFilePath && (
+                    <Box
+                      sx={{
+                        width: 180,
+                        height: 180,
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        boxShadow: 2,
+                        mx: 'auto'
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={`${SERVER_URL}/${form.roughnessMapFilePath}`}
+                        alt="Texture Preview"
+                        sx={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    </Box>
+                  )}
+
+
+
+
+
+
+                  <Button variant="contained" component="label" startIcon={<ImageIcon />}>
+                    Upload Normal Map
+                    <input hidden type="file" accept="image/*" onChange={uploadNormalMapfn} />
+                  </Button>
+
+                  <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        flex: 1,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {form?.normalMapFileName || 'No texture selected'}
+                    </Typography>
+
+                    {form?.normalMapFilePath && (
+                      <Tooltip title={previewTextureForNormalMap ? 'Hide Preview' : 'Show Preview'}>
+                        <IconButton onClick={() => setPreviewTextureForNormalMap((prev) => !prev)}>
+                          <VisibilityIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Stack>
+
+                  {previewTextureForNormalMap && form?.normalMapFilePath && (
+                    <Box
+                      sx={{
+                        width: 180,
+                        height: 180,
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        boxShadow: 2,
+                        mx: 'auto'
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={`${SERVER_URL}/${form.normalMapFilePath}`}
+                        alt="Texture Preview"
+                        sx={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    </Box>
+                  )}
+
+
+
+
+
+
+
 
                   <Box>
                     <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1 }}>
